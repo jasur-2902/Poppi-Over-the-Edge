@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Poppi Over the Wall",
+    "description": "A side-scroller where the player controls a bird, attempting to fly between columns of green pipes without hitting them.",
+    "slug": "flappy-bird",
+    "privacy": "unlisted",
+    "sdkVersion": "32.0.0",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "primaryColor": "#91DE78",
+    "icon": "./assets/icons/loading-icon.png",
+    "splash": {
+      "image": "./assets/icons/loading-icon.png",
+      "backgroundColor": "#91DE78"
+    },
+    "packagerOpts": {
+      "assetExts": ["ttf", "mp4", "otf", "xml"]
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "platforms": ["android", "ios", "web"]
+  }
+}
