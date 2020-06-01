@@ -1,8 +1,8 @@
 {
-  "name": "flappy-bird",
+  "name": "poppi",
   "version": "0.0.0",
-  "description": "A side-scroller where the player controls a bird, attempting to fly between columns of green pipes without hitting them.",
-  "author": "Evan Bacon",
+  "description": "",
+  "author": "Jasur Shukurov",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {

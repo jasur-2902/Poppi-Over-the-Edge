@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Poppi Over the Wall",
-    "description": "A side-scroller where the player controls a bird, attempting to fly between columns of green pipes without hitting them.",
-    "slug": "flappy-bird",
+    "name": "Poppi Over the Edge",
+    "description": "",
+    "slug": "poppi",
     "privacy": "unlisted",
     "sdkVersion": "32.0.0",
     "version": "1.0.0",
