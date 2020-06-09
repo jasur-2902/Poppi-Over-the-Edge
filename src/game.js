@@ -1,7 +1,7 @@
 // Importing libraries 
 import { PIXI } from 'expo-pixi';
-import { Container, extras, Sprite } from 'pixi.js';
-import { AsyncStorage, PixelRatio } from 'react-native';
+import {extras, Sprite } from 'pixi.js';
+import {PixelRatio } from 'react-native';
 
 // Importing backgrounds and assets 
 import source2 from '../assets/ground2.png';
@@ -19,6 +19,9 @@ import groundSprites from './Sprites/ground';
 import penguinSprites from './Sprites/penguin';
 
 
+
+const {AnimatedSprite } = extras;
+
 // Getting scale to adjust size of the game to different screen sizes, Using PixelRatio library 
 const scale = PixelRatio.get();
 
@@ -31,15 +34,15 @@ let Settings = {
   playerHorizontalPosition: 640 * scale,
   playerVerticalPosition: 650 * scale,
   playerMaxVelocity: -3 * scale,
-  pipeWidth: 80 * scale,
-  groundHeight: 100 * scale,
-  pipeHeight: 500 * scale,
+  groundPositionX: 0,
+  groundPositionY: 0,
   playerGravity: 0 * scale,
   minPipeHeight: 50 * scale,
   pipeVerticalGap: 190 * scale, //180 is pretty legit
-  gameSpeed: 15 * 0.25,
+  gameSpeed: 15 * 0.25, // Game speed 
   guardWidth: 140 * scale,
-  guardHeight: 140 * scale
+  guardHeight: 140 * scale,
+  secondCloudPositionY: 0
 };
 
 
@@ -47,7 +50,7 @@ let Settings = {
 class SteadySprite extends Sprite {
   constructor(...args) {
     super(...args);
-    this.scale.set(scale);
+    //this.scale.set(scale);
   }
 }
 
@@ -61,11 +64,16 @@ class Ground2 extends Sprite {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
+    console.log("SIZE:", Settings.width, Settings.height, scale);
+   
+    this.height = Settings.height / 2.4;
+    this.width = Settings.width / 1.1;
+
+    Settings.groundPositionX = Settings.width / 20;
+    Settings.groundPositionY = Settings.height - this.height;
     
-    // this.height = Settings.guardHeight;
-    this.width = 1200 * scale;
-    this.position.x = 100;
-    this.position.y = Settings.skyHeight*0.7;
+    this.position.x = Settings.groundPositionX;
+    this.position.y = Settings.groundPositionY;
 
   }
 
@@ -74,20 +82,17 @@ class Ground2 extends Sprite {
 // Object clouds on the side 
 class SideClouds extends Sprite {
 
-  backward = true;
-
-  buttonIsPressed = false;
-
   constructor(texture) {
     super(texture, Settings.width, Settings.groundHeight);
-    this.scale.set(scale * 2);
 
 
-    // this.height = Settings.guardHeight;
-    this.width = 1275 * scale;
-   // this.height = 500;
+    this.width = Settings.width;
+    this.height = Settings.height/4;
     this.position.x = 0;
-    this.position.y = Settings.skyHeight*0.7;
+
+    Settings.secondCloudPositionY = Settings.height / 1.5;
+
+    this.position.y = Settings.secondCloudPositionY;
 
   }
 
@@ -96,17 +101,13 @@ class SideClouds extends Sprite {
 // Bottom Clouds #TODO Rename it to something more generic
 class Cloud extends Sprite {
 
-  backward = true;
-
-  buttonIsPressed = false;
-
   constructor(texture) {
-    super(texture, Settings.width, Settings.groundHeight);
+    super(texture);
     this.scale.set(scale * 2);
-    
-    this.width = 1280 * scale;
+    this.height = Settings.height/6;
+    this.width = Settings.width;
     this.position.x = 0;
-    this.position.y = Settings.skyHeight;
+    this.position.y = Settings.height - this.height;
   }
 
 }
@@ -123,9 +124,9 @@ class CaughtMessage extends Sprite {
     this.scale.set(scale * 2);
 
     //TODO Make it scalable 
-    this.width = 300;
-    this.height = 350;
-    this.position.x = 600 * scale;
+    this.width = Settings.width/8;
+    this.height = Settings.height/6;
+    this.position.x = Settings.width/2;
     this.position.y = Settings.skyHeight ;
 
   }
@@ -134,24 +135,21 @@ class CaughtMessage extends Sprite {
 
 // Guard Object 
 class Guard extends Sprite {
-  //TODO COmment it, delete unnessary one 
-  backward = true;
-  buttonIsPressed = false; 
- 
+  
   constructor(texture) {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
-    this.width = Settings.guardWidth;
-    this.height = Settings.guardHeight;
+    this.width = Settings.width/10;
+    this.height = Settings.height/8;
 
-    this.position.x = 600 * scale;
-    this.position.y = 600 * scale; 
+    this.position.x = Settings.width/2;
+    this.position.y = Settings.height; 
   }
 }
 
 // Background object 
-class Background extends SteadySprite {
+class Background extends Sprite {
   constructor(texture) {
     super(texture);
     this.position.x = 0;
@@ -169,10 +167,10 @@ class Bird extends AnimatedSprite {
 
   constructor(textures) {
     super(textures);
-    this.animationSpeed = 0.02;
+    this.animationSpeed = 0.00;
     this.anchor.set(0.5);
-    this.width = 50 * scale;
-    this.height = 45 * scale;
+    this.width = Settings.width/20;
+    this.height = Settings.height/15;
 
     this.speedY = Settings.playerFallSpeed;
     this.rate = Settings.playerGravity;
@@ -184,8 +182,8 @@ class Bird extends AnimatedSprite {
   restart = () => {
     this.play();
     this.rotation = 0;
-    this.position.x = Settings.playerHorizontalPosition;
-    this.position.y = Settings.playerVerticalPosition;
+    this.position.x = Settings.width/2 ;
+    this.position.y = Settings.height/1.1;
   };
 
 }
@@ -222,7 +220,6 @@ class Game {
     this.app.ticker.add(this.animate);
 
     Settings.width = this.app.renderer.width;
-    Settings.pipeScorePosition = -(Settings.width - Settings.playerHorizontalPosition);
     Settings.height = this.app.renderer.height;
     Settings.skyHeight = Settings.height - Settings.groundHeight;
     Settings.pipeHorizontalGap = Settings.pipeWidth * 5;
@@ -233,12 +230,12 @@ class Game {
   resize = ({ width, height, scale }) => {
     const parent = this.app.view.parentNode;
     //Resize the renderer
-    this.app.renderer.resize(width * scale, height * scale);
+    //this.app.renderer.resize(width * scale, height * scale);
 
-    if (Platform.OS === 'web') {
-      this.app.view.style.width = width;
-      this.app.view.style.height = height;
-    }
+    // if (Platform.OS === 'web') {
+    //   this.app.view.style.width = width;
+    //   this.app.view.style.height = height;
+    // }
   };
 
   // Async loading textures and backgrounds
@@ -298,6 +295,7 @@ class Game {
       this.app.stage.addChild(child),
     );
 
+
     this.stopAnimating = false;
   };
 
@@ -315,23 +313,23 @@ class Game {
       if(this.ground2.groundDown = false){
         this.ground2.groundDown = true;
       }
-      else{
-        this.ground2.groundDown = false;
-      }
+
 
       this.beginGame();
     
     //TODO Make 2500 global, this is time after which lose message will be displayed 
     setTimeout(() => {
       this.loseMessage();
-    }, 2500);
+    }, 2000);
 
   }; 
 
 
   //Function which will run once user releases the button 
   onPressOut = () =>{
+    this.ground2.moveGround = false;
     this.moveBack();
+    this.bird.animationSpeed = 0;
   }
 
   
@@ -349,7 +347,7 @@ class Game {
     }
 
     // If game is started and button was pressed 
-    if (this.isStarted && this.guard.buttonIsPressed){
+    if (this.isStarted && this.ground2.moveGround ){
 
       this.moveToTheEdge();
     }
@@ -361,9 +359,9 @@ class Game {
     if (!this.ground2.groundDown) {
       this.ground2.position.y += Settings.gameSpeed;
       this.edge.position.y += Settings.gameSpeed;
-      if (this.ground2.position.y > Settings.skyHeight*0.9)
+      if (this.ground2.position.y > Settings.height*0.7)
         this.ground2.groundDown = true;
-        this.guard.position.y = Settings.skyHeight * 0.5
+        this.guard.position.y = Settings.height/2.5;
     }
     else if (this.ground2.position.x > Settings.skyHeight) {
       this.ground2.position.x += Settings.gameSpeed;
@@ -379,7 +377,7 @@ class Game {
   loseMessage() {
     if (!this.isButtonReleased) {
       console.log("Lose Message!");
-      this.caughtMessage.position.y = Settings.skyHeight * 0.4;
+      this.caughtMessage.position.y = Settings.height * 0.4;
       this.userLost = true;
     }
     else { // Some debugging 
@@ -388,8 +386,8 @@ class Game {
   }
 
   moveBack = () => {
-    this.ground2.position.y = Settings.skyHeight * 0.7;
-    this.edge.position.y = Settings.skyHeight * 0.7;
+    this.ground2.position.y = Settings.groundPositionY;
+    this.edge.position.y = Settings.secondCloudPositionY;
   };
 
   restart = () => {

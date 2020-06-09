@@ -18,10 +18,12 @@ export default StyleSheet.create({
   modalContent: {
     backgroundColor: "white",
     padding: 22,
-    justifyContent: "center",
-    alignItems: "center",
+    height: '40vh',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 4,
-    borderColor: "rgba(0, 0, 0, 0.1)"
+    borderColor: "rgba(0, 0, 0, 0.1)",
+   
   },
   bottomModal: {
     justifyContent: "flex-end",

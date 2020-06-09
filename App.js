@@ -8,23 +8,40 @@ import Modal from 'modal-enhanced-react-native-web';
 //importing styles 
 import styles from "./src/styles";
 
+
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
 import Game from './src/game';
 import Level2 from './src/level2';
 import WalkingObject from './src/walking';
 import sprites3 from './src/Sprites/guardSheet';
 
+require('default-passive-events');
 
 export default class App extends React.Component {
+  
+  level1_Settings = {
+    level: 1, //level 
+    max: 3, // maximum number of guards
+    green: 10, // number of green guards in this level
+    yellow: 0, // number of yellow guards in this level
+    red: 0, // number of red guards in this level
+    max_repetition: 4, // max number of one type of the guard repeats 
+    min_repetition: 2,
+  };
+  
   state = {
     level_state: 'create_list',
-    score: 0,
+    sleepingPills: 0,
     modalVisible: false,
     visibleLost: false,
+    visibleCaught: false,
     result: false,
     level_1: true,
     walking: true, 
+    win: false,
     lastRefresh: Date(Date.now()).toString(),
+    isListEmpty: false,
+    currentLevel: this.level1_Settings,
   };
 
   refreshScreen() {
@@ -33,21 +50,12 @@ export default class App extends React.Component {
 
   guardsList = [];
   backgroundList=[]; 
+  numberOfCards = 30;
+
+  game = null;
 
   currentGuard; 
   
-   level1_Settings = {
-      level: 1, //level 
-      max: 3, // maximum number of guards
-      green: 10, // number of green guards in this level
-      yellow: 0, // number of yellow guards in this level
-      red: 0, // number of red guards in this level
-      max_repetition: 4, // max number of one type of the guard repeats 
-      min_repetition: 2,
-    };
-
-
-
     level2_Settings = {
       level: 2, //level 
       max: 3, // maximum number of guards
@@ -70,21 +78,21 @@ export default class App extends React.Component {
 
 
 
-    numberOfCards = 30; 
-
-  createGuardList(){
    
-
+  createGuardList(level){
+   
+    this.guardsList = []
+    this.backgroundList = [];
     let random;  // returns a random integer from 0 to 10; 
 
 
-    let green = this.level3_Settings.green;
-    let yellow = this.level3_Settings.yellow;
-    let red = this.level3_Settings.red;
+    let green = level.green;
+    let yellow = level.yellow;
+    let red = level.red;
 
     let dic = {}
 
-    for (let i = 1; i <= this.level3_Settings.max; i++)
+    for (let i = 1; i <= level.max; i++)
       dic[i] = 0;
 
     let temp;
@@ -93,7 +101,7 @@ export default class App extends React.Component {
 
       temp = sprites3[random];
 
-      if (dic[temp.number] < this.level3_Settings.max_repetition) {
+      if (dic[temp.number] < level.max_repetition) {
         if (temp.number == 1 && dic[1] > 2) {
         }
         else {
@@ -144,33 +152,49 @@ export default class App extends React.Component {
   );
 
   _renderModalContent = () => (
-    <View isLost={false} style= { {height:600}} style={styles.modalContent}>
-      <Text>How many Guards did you see?</Text>
+    <View isLost={false} style={styles.modalContent}>
+      
 
       {
         // Display the content in screen when state object "content" is true.
         // Hide the content in screen when state object "content" is false. 
-        !this.state.result ? <Text style={styles.headerText}> 
-        
-          {this._renderButton("1", () => { this.checkForResult(1) })}
-          {this._renderButton("2", () => { this.checkForResult(2) })}
-          {this._renderButton("3", () => { this.checkForResult(3) })}
-          {this._renderButton("4", () => { this.checkForResult(4)})}
-          {this._renderButton("5", () => this.checkForResult(5))}
+        !this.state.result && !this.state.win ? 
+        <View>
+          <Text style={styles.headerText}>How many Guards did you see?</Text>
+          <Text style={styles.headerText}> 
+            {this._renderButton("1", () => { this.checkForResult(1) })}
+            {this._renderButton("2", () => { this.checkForResult(2) })}
+            {this._renderButton("3", () => { this.checkForResult(3) })}
+            {this._renderButton("4", () => { this.checkForResult(4)})}
+            {this._renderButton("5", () => this.checkForResult(5))}
 
-        </Text> : null
+          </Text> 
+        </View>: null
       }
 
       {
         // Display the content in screen when state object "content" is true.
         // Hide the content in screen when state object "content" is false. 
-        this.state.result ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!  
+        this.state.result && !this.state.isListEmpty ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!  
         
-        {this._renderButton("Next Level", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'walking' });})}
+        {this._renderButton("Next Stage", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'walking' });})}
 
         </Text> : null 
+
+        
            
- }
+        }
+
+      {
+        // Display the content in screen when state object "content" is true.
+        // Hide the content in screen when state object "content" is false. 
+        this.state.win ? <Text style={styles.headerText}> {"\n"}Congratulations, you won!
+
+        {this._renderButton("Next Level", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'create_list' }); this.setState({ currentLevel: this.level3_Settings, win: false, isListEmpty:false });})}
+
+        </Text> : null
+
+      }
 
     </View>
   );
@@ -179,18 +203,32 @@ export default class App extends React.Component {
  checkForResult(userChoice){
 
     if(userChoice == this.currentGuard.number){
-      this.setState({ result: true });
+      if(!this.state.isListEmpty)
+        !this.setState({ result: true });
+      else
+        this.setState({win: true});
     }
     else{
       this.setState({ visibleModal: null });
+      this.setState({visibleLost: true });
     }
 
  }
   
   _renderModalLost = () => (
     <View style={styles.modalContent}>
-      <Text>That’s not right! Start Again! </Text>
-      {this._renderButton("Try Again!", () => console.log("Try Again"))}
+      <Text>That’s not right! Please Try Again! </Text>
+      {this._renderButton("Try Again!", () => {
+        this.setState({ level_state: 'create_list' }); this.setState({ visibleLost: false});})}
+    </View>
+  );
+
+  _renderModalCaught= () => (
+    <View style={styles.modalContent}>
+      <Text>The Guards caught you! Please Try Again! </Text>
+      {this._renderButton("Try Again!", () => {
+        this.setState({ level_state: 'create_list' }); this.setState({ visibleCaught: false });
+      })}
     </View>
   );
 
@@ -213,17 +251,14 @@ export default class App extends React.Component {
         this.game.onPressOut(); this.setState({ visibleModal: true }); this.game.isButtonReleased = true
       }
     else{
-      this.setState({ visibleLost: true });
+      this.setState({ visibleCaught: true });
     }
   };
   
   render() {
     const { style, ...props } = this.props;
 
-    console.log(this.state.level_1)
-
-
-
+  
     const levelOne = (
 
       <View
@@ -247,6 +282,14 @@ export default class App extends React.Component {
           {this._renderModalLost()}
 
         </Modal>
+        <Modal
+          isVisible={this.state.visibleCaught}
+        //onBackdropPress={() => this.setState({ visibleLost: false })}
+        >
+
+          {this._renderModalCaught()}
+
+        </Modal>
 
 
         <DisableBodyScrollingView >
@@ -254,15 +297,28 @@ export default class App extends React.Component {
           <GLView
             style={{ flex: 1, backgroundColor: 'black' }}
             onContextCreate={context => {
+              if (this.guardsList.length > 1){
+                
+                this.currentGuard = this.guardsList.pop();
+                let path = this.backgroundList.pop();
+                let bg = require('./assets/' + path);
 
-              this.currentGuard = this.guardsList.pop();
-              let path = this.backgroundList.pop();
-              let bg = require('./assets/' + path);
+                this.game = new Game(context, bg, this.currentGuard.name);
 
-              this.game = new Game(context, bg, this.currentGuard.name);
+                console.log(this.currentGuard);
+                this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
+              }
+              else{
+                this.setState({ isListEmpty: true })
+                this.currentGuard = this.guardsList.pop();
+                let path = this.backgroundList.pop();
+                let bg = require('./assets/' + path);
 
-              console.log(this.currentGuard);
-              this.game.onScore = score => this.setState({ score });
+                this.game = new Game(context, bg, this.currentGuard.name);
+
+                console.log(this.currentGuard);
+                this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
+              }
 
             }}
           >
@@ -277,7 +333,6 @@ export default class App extends React.Component {
         <TouchableOpacity
           style={{
             userSelect: 'none',
-            textDecoration: 'none',
             position: 'absolute',
             bottom: 50,
             left: 100,
@@ -286,13 +341,29 @@ export default class App extends React.Component {
           onPressOut={() => { this.displayQuestions() }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Image
-              style={{ width: 100, userSelect: 'none', height: 100 }}
+              style={{ width: '10vw', userSelect: 'none', height: '10vh' }}
               source={require('./assets/binoculars6.png')}
+              resizeMode="contain"
             />
             {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
           </View>
         </TouchableOpacity>
 
+
+        {/* <View style={{ 
+          flexDirection: 'row', alignItems: 'center',
+          userSelect: 'none',
+          position: 'absolute',
+          top: 50,
+          right: 100,}}>
+          <Image
+            
+            style={{ width: '5vw', userSelect: 'none', height: '5vh' }}
+            source={require('./assets/sleepingSpell.png')}
+            resizeMode="contain"
+          />
+          
+           </View> */}
 
 
 
@@ -328,15 +399,13 @@ export default class App extends React.Component {
 
         <DisableBodyScrollingView >
 
-
-
-
           <GLView
             style={{ flex: 1, backgroundColor: 'black' }}
             onContextCreate={context => {
               this.game = new WalkingObject(context);
-               this.setState({walking: this.game.stoppedWalking });
-              console.log("Inside walking object: " + this.game.stoppedWalking )
+             // this.game.walking = walking => { this.setState({ walking: walking }); if (!walking) this.setState({ level_state: 'levelOne' });};
+             // console.log("Inside walking object: " + this.state.walking )
+            
 
        }}
      >
@@ -347,7 +416,6 @@ export default class App extends React.Component {
         <TouchableOpacity
           style={{
             userSelect: 'none',
-            textDecoration: 'none',
             position: 'absolute',
             bottom: 50,
             left: 100,
@@ -373,9 +441,9 @@ export default class App extends React.Component {
     
       
       <div>
-        {this.state.level_state == 'create_list' && this.createGuardList()}
+        {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel)}
         {this.state.level_state == 'walking' && walking}
-        {this.state.level_state == 'levelOne' && levelOne}
+        {this.state.level_state == 'levelOne' && levelOne} 
       </div>
 
       
@@ -384,3 +452,19 @@ export default class App extends React.Component {
   }
 }
 
+const SleepingPills = ({ children }) => (
+  <Text
+    style={{
+      position: 'absolute',
+      left: 0,
+      top: '10%',
+      right: 0,
+      textAlign: 'center',
+      color: 'white',
+      fontSize: 48,
+      userSelect: 'none',
+    }}
+  >
+    {/* {children} */}
+  </Text>
+);
