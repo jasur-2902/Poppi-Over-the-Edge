@@ -11,10 +11,20 @@ import styles from "./src/styles";
 
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
 import Game from './src/game';
+<<<<<<< HEAD
 import Level2 from './src/level2';
 import WalkingObject from './src/walking';
 import sprites3 from './src/Sprites/guardSheet';
 
+=======
+
+import WalkingObject from './src/walking';
+import sprites3 from './src/Sprites/guardSheet';
+
+import MainMenu from "./src/Menu/mainmenu";
+import LevelSelection from "./src/Menu/LevelSelection";
+
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
 require('default-passive-events');
 
 export default class App extends React.Component {
@@ -30,7 +40,11 @@ export default class App extends React.Component {
   };
   
   state = {
+<<<<<<< HEAD
     level_state: 'create_list',
+=======
+    level_state: 'menu',
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
     sleepingPills: 0,
     modalVisible: false,
     visibleLost: false,
@@ -42,6 +56,11 @@ export default class App extends React.Component {
     lastRefresh: Date(Date.now()).toString(),
     isListEmpty: false,
     currentLevel: this.level1_Settings,
+<<<<<<< HEAD
+=======
+    isMainMenuVisible: true, 
+    isLevelsMenuVisible: true, 
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
   };
 
   refreshScreen() {
@@ -138,7 +157,11 @@ export default class App extends React.Component {
     this.backgroundList.push("background.png");
     this.backgroundList.push("background2.png");
     this.backgroundList.push("background.png");
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
     this.setState({ level_state: 'levelOne' }); 
     
   }
@@ -254,7 +277,32 @@ export default class App extends React.Component {
       this.setState({ visibleCaught: true });
     }
   };
+<<<<<<< HEAD
   
+=======
+
+
+  levelSelectionMenu = () => {
+    this.setState({
+      isLevelsMenuVisible: true,
+    }); 
+  };
+
+
+  backToMainMenu = () => {
+    this.setState({
+      isMainMenuVisible: true,
+    });
+  };
+
+  startGame = () => {
+    this.setState({
+      isMainMenuVisible: false,
+    });
+  };
+
+
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
   render() {
     const { style, ...props } = this.props;
 
@@ -441,6 +489,21 @@ export default class App extends React.Component {
     
       
       <div>
+<<<<<<< HEAD
+=======
+        {this.state.level_state == 'menu' && !this.state.isLevelsMenuVisible && (
+            <MainMenu
+              startGame={this.startGame}
+              levelSelectionMenu = {this.levelSelectionMenu}
+            />
+          )}
+
+          {this.state.isLevelsMenuVisible && (
+            <LevelSelection
+              startGame={this.startGame}
+            />
+          )}
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
         {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel)}
         {this.state.level_state == 'walking' && walking}
         {this.state.level_state == 'levelOne' && levelOne} 

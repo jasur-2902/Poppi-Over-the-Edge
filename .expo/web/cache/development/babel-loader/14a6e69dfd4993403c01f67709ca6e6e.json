@@ -1,0 +1,1 @@
+{"ast":null,"code":"export var GestureHandler = {};","map":{"version":3,"sources":["../src/GestureHandler.web.ts"],"names":[],"mappings":"AAAA,OAAO,IAAM,cAAc,GAAG,EAAvB","sourcesContent":["export const GestureHandler = {};\n"],"sourceRoot":""},"metadata":{},"sourceType":"module"}

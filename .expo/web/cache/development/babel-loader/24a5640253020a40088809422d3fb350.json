@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default as Print } from \"./Print\";","map":{"version":3,"sources":["../src/index.ts"],"names":[],"mappings":"AAAA,SAAS,OAAO,IAAI,KAApB","sourcesContent":["export { default as Print } from './Print';\n"],"sourceRoot":""},"metadata":{},"sourceType":"module"}

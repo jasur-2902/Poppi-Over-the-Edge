@@ -1,0 +1,1 @@
+{"ast":null,"code":"export * from 'react-native';","map":{"version":3,"sources":["C:/Users/jshukurov/Desktop/Poppi Over The Edge/Poppi-Over-the-Edge-master/node_modules/@expo/vector-icons/vendor/react-native-vector-icons/lib/react-native.js"],"names":[],"mappings":"AAAA,cAAc,cAAd","sourcesContent":["export * from 'react-native';\n"]},"metadata":{},"sourceType":"module"}

@@ -1,0 +1,1 @@
+{"ast":null,"code":"import Icon from '@expo/vector-icons';\nexport default Icon;","map":{"version":3,"sources":["../src/Icon.ts"],"names":[],"mappings":"AAAA,OAAO,IAAP,MAAiB,oBAAjB;AACA,eAAe,IAAf","sourcesContent":["import Icon from '@expo/vector-icons';\nexport default Icon;\n"],"sourceRoot":""},"metadata":{},"sourceType":"module"}

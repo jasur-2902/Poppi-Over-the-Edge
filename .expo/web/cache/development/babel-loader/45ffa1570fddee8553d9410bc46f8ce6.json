@@ -1,0 +1,1 @@
+{"ast":null,"code":"export default {\n  activate() {},\n\n  deactivate() {}\n\n};","map":{"version":3,"sources":["../src/ExpoKeepAwake.web.ts"],"names":[],"mappings":"AAAA,eAAe;AACb,EAAA,QAAQ,GAAA,CAAK,CADA;;AAEb,EAAA,UAAU,GAAA,CAAK;;AAFF,CAAf","sourcesContent":["export default {\n  activate() {},\n  deactivate() {},\n};\n"],"sourceRoot":""},"metadata":{},"sourceType":"module"}

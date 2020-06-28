@@ -12,7 +12,12 @@
   },
   "dependencies": {
     "default-passive-events": "^1.0.10",
+<<<<<<< HEAD
     "expo": "^33.0.0-alpha.web.1",
+=======
+    "expo": "^33.0.0",
+    "expo-cli": "^3.21.9",
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
     "expo-pixi": "^1.1.0",
     "modal-enhanced-react-native-web": "^0.2.0",
     "modal-react-native-web": "^0.2.0",
@@ -21,6 +26,11 @@
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-countdown-component": "^2.7.1",
+<<<<<<< HEAD
+=======
+    "react-native-elements": "^2.0.2",
+    "react-native-super-grid": "^4.0.2",
+>>>>>>> 6aa2e53504aa90ca5e431e94736908ec6d508d63
     "react-native-viewport-units": "^0.0.5",
     "react-native-web": "^0.11.2"
   },
