@@ -1,0 +1,1 @@
+{"ast":null,"code":"export * from 'expo-react-native-adapter';","map":{"version":3,"sources":["../src/index.ts"],"names":[],"mappings":"AAAA,cAAc,2BAAd","sourcesContent":["export * from 'expo-react-native-adapter';\n"],"sourceRoot":""},"metadata":{},"sourceType":"module"}

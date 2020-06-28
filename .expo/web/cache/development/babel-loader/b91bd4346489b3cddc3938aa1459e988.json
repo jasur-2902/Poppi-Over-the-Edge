@@ -1,0 +1,1 @@
+{"ast":null,"code":"export { default as SQLite } from \"./SQLite\";","map":{"version":3,"sources":["../src/index.ts"],"names":[],"mappings":"AAAC,SAAS,OAAO,IAAI,MAApB","sourcesContent":[" export { default as SQLite } from './SQLite';\n"],"sourceRoot":""},"metadata":{},"sourceType":"module"}
