@@ -8,6 +8,9 @@ import Modal from 'modal-enhanced-react-native-web';
 //importing styles 
 import styles from "./src/styles";
 
+import Card from 'react-native-elements';
+
+
 
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
 import Game from './src/game';
@@ -58,7 +61,7 @@ export default class App extends React.Component {
 
   guardsList = [];
   backgroundList=[]; 
-  numberOfCards = 30;
+  numberOfCards = 44;
 
   game = null;
 
@@ -87,8 +90,14 @@ export default class App extends React.Component {
   // a function that saves your data asyncronously
   _storeData = async () => {
     try {
-      await AsyncStorage.setItem('current_level', this.state.currentLevel);
-      await AsyncStorage.setItem('highest_level', this.state.highestLevel);
+      await AsyncStorage.setItem('current_level', JSON.stringify(this.state.currentLevel)).then(() => {
+        console.log('It was saved successfully')
+        console.log(JSON.stringify(this.state.currentLevel))
+      })
+        .catch(() => {
+          console.log('There was an error saving the product')
+        });
+       await AsyncStorage.setItem('highest_level', this.state.highestLevel);
 
     } catch (error) {
       // Error saving data
@@ -104,7 +113,7 @@ export default class App extends React.Component {
       if (current_level !== null && highest_level !== null) {
         
         // Our data is fetched successfully
-        this.setState({ highestLevel: highest_level });
+        //this.setState({ highestLevel: highest_level });
         this.setState({ currentLevel: current_level })
       }
       else{
@@ -114,6 +123,7 @@ export default class App extends React.Component {
       // Error retrieving data
     }
   }
+
    
   createGuardList(level){
    
@@ -296,6 +306,9 @@ export default class App extends React.Component {
     this.setState({
       isLevelsMenuVisible: true,
     }); 
+
+    this._storeData();
+    this._retrieveData();
   };
 
 
@@ -308,7 +321,11 @@ export default class App extends React.Component {
   startGame = () => {
     this.setState({
       isMainMenuVisible: false,
+      level_state: 'create_list',
     });
+
+    console.log(this.state.level_state)
+    console.log("start game")
   };
 
 
@@ -387,6 +404,29 @@ export default class App extends React.Component {
 
         </DisableBodyScrollingView>
        
+        <View style={{
+          userSelect: 'none',
+          position: 'absolute',
+          top: 25,
+          left: 25,
+        }}>
+          <Card title={"Level " + this.state.currentLevel.level}>
+            {/*react-native-elements Card*/}
+            <Text style={styles.paragraph}>
+              Stage {10 - this.guardsList.length + 1}/10
+          </Text>
+
+            <Text>5 X
+            {/* <Image
+                style={{ width: '1.5vw', userSelect: 'none', height: '1.5vh', top: 3 }}
+                //source={require('./assets/sleepingSpell.png')}
+                resizeMode="contain"
+              /> */}
+            </Text>
+          </Card>
+        </View>
+
+
         <TouchableOpacity
           style={{
             userSelect: 'none',
@@ -496,8 +536,6 @@ export default class App extends React.Component {
 
     return (
     
-      this._retrieveData(),
-      this._storeData(),
       <div>
 
         {this.state.level_state == 'menu' && !this.state.isLevelsMenuVisible && (

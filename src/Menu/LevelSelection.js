@@ -7,6 +7,7 @@ import {
   View,
   Image,
   FlatList,
+  AsyncStorage,
   TouchableOpacity,
 } from "react-native";
 
@@ -18,30 +19,26 @@ import colors from "../../assets/constants/colors";
 import Button from "../../assets/Button";
 
 
+let highestLevel = 1;
+
+// _retrieveData = async () => {
+//   try {
+//     const highest_level = await AsyncStorage.getItem('highest_level');
+//     if (highest_level !== null) {
+//       // Our data is fetched successfully
+//       console.log(highest_level.toString())
+//       this.highestLevel = highest_level;
+//     }
+//     else {
+//       console.log("null")
+//     }
+//   } catch (error) {
+//     // Error retrieving data
+//   }
+// }
 
 const LevelSelection = ({ numPlayers, onNumPlayersChange, startGame }) => {
   
-  state ={
-    hieghestLevel: 1, 
-  }
-
-
-  _retrieveData = async () => {
-    try {
-      const highest_level = await AsyncStorage.getItem('highest_level');
-      if (highest_level !== null) {
-        // Our data is fetched successfully
-        console.log(highest_level.toString())
-        this.setState({ highestLevel: highest_level });
-      }
-      else {
-        console.log("null")
-      }
-    } catch (error) {
-      // Error retrieving data
-    }
-  }
-
 
   const [items, setItems] = React.useState([
     { name: 'Mountain', code: '#1abc9c', level:'Level 1'       , background:'background/mountain.png'},
@@ -61,7 +58,7 @@ const LevelSelection = ({ numPlayers, onNumPlayersChange, startGame }) => {
 
   return (
 
-    _retrieveData(),
+    // this._retrieveData(),
     <View style={styles.root}>
       <ImageBackground source={require("../../assets/trianglify.png")} style={styles.root}>
       <Text style={styles.text}>Please select the level:</Text>

@@ -5,7 +5,7 @@ import {PixelRatio } from 'react-native';
 
 // Importing backgrounds and assets 
 import source2 from '../assets/ground2.png';
-import source3 from '../assets/guards/guards6.png';
+import source3 from '../assets/guards/guards10.png';
 import groundSouce from '../assets/ground/ground3.png';
 import penguinSource from '../assets/penguin/penguin1.png';
 
@@ -140,8 +140,8 @@ class Guard extends Sprite {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
-    this.width = Settings.width/10;
-    this.height = Settings.height/8;
+    this.width = Settings.width/8;
+    this.height = Settings.height/4;
 
     this.position.x = Settings.width/2;
     this.position.y = Settings.height; 

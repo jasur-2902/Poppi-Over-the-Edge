@@ -1,10 +1,10 @@
 {
   "devToolsPort": 19002,
-  "expoServerPort": 19000,
-  "packagerPort": 19001,
-  "packagerPid": 4691,
-  "webpackServerPort": 19006,
-  "expoServerNgrokUrl": "https://my-p2q.jasurshukurov.poppi-over-the-edge.exp.direct",
-  "packagerNgrokUrl": "https://packager.my-p2q.jasurshukurov.poppi-over-the-edge.exp.direct",
-  "ngrokPid": 4712
+  "expoServerPort": null,
+  "packagerPort": null,
+  "packagerPid": null,
+  "webpackServerPort": null,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null
 }
