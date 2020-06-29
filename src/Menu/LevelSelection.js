@@ -13,7 +13,6 @@ import {
 import { FlatGrid } from 'react-native-super-grid';
 
 
-import { Card, ListItem, Icon } from 'react-native-elements'
 
 import colors from "../../assets/constants/colors";
 import Button from "../../assets/Button";
@@ -22,38 +21,65 @@ import Button from "../../assets/Button";
 
 const LevelSelection = ({ numPlayers, onNumPlayersChange, startGame }) => {
   
+  state ={
+    hieghestLevel: 1, 
+  }
+
+
+  _retrieveData = async () => {
+    try {
+      const highest_level = await AsyncStorage.getItem('highest_level');
+      if (highest_level !== null) {
+        // Our data is fetched successfully
+        console.log(highest_level.toString())
+        this.setState({ highestLevel: highest_level });
+      }
+      else {
+        console.log("null")
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
+  }
+
+
   const [items, setItems] = React.useState([
-    { name: 'TURQUOISE', code: '#1abc9c', level:'Level 1'       , background:'trianglify.png'},
-    { name: 'EMERALD', code: '#2ecc71', level:'Level 2'         , background:'trianglify.png'},
-    { name: 'PETER RIVER', code: '#3498db', level:'Level 3'     , background:'trianglify.png'},
-    { name: 'AMETHYST', code: '#9b59b6', level:'Level 4'        , background:'trianglify.png'},
-    { name: 'WET ASPHALT', code: '#34495e', level:'Level 5'     , background:'trianglify.png'},
-    { name: 'GREEN SEA', code: '#16a085', level:'Level 6'       , background:'trianglify.png'},
-    { name: 'NEPHRITIS', code: '#27ae60', level:'Level 7'       , background:'trianglify.png'},
-    { name: 'BELIZE HOLE', code: '#2980b9', level:'Level 8'     , background:'trianglify.png'},
-    { name: 'WISTERIA', code: '#8e44ad', level:'Level 9'        , background:'trianglify.png'},
-    { name: 'MIDNIGHT BLUE', code: '#2c3e50', level:'Level 10'  , background:'trianglify.png'},
-    { name: 'SUN FLOWER', code: '#f1c40f', level:'Level 11'     , background:'trianglify.png'},
-    { name: 'CARROT', code: '#e67e22', level:'Level 12'         , background:'trianglify.png'},
+    { name: 'Mountain', code: '#1abc9c', level:'Level 1'       , background:'background/mountain.png'},
+    { name: 'Jungle', code: '#2ecc71', level: 'Level 2'        , background:'background/jungle.jpg'},
+    { name: 'Ruins', code: '#3498db', level: 'Level 3', background:'background/ruins.png'},
+    { name: 'Underwater', code: '#9b59b6', level:'Level 4'        , background:'background/underwater.png'},
+    { name: 'Desert', code: '#34495e', level: 'Level 5',     background:'background/desert.png'},
+    { name: 'Halloween', code: '#16a085', level: 'Level 6'      , background:'background/halloween.png'},
+    { name: 'Winterland', code: '#27ae60', level:'Level 7'       , background:'background/winterland.png'},
+    { name: '', code: '#2980b9', level: 'Level 8'    , background:'background/comingsoon.jpg'},
+    { name: '', code: '#8e44ad', level: 'Level 9'       ,       background:'background/comingsoon.jpg'},
+    { name: '', code: '#2c3e50', level: 'Level 10' ,background:'background/comingsoon.jpg'},
+    { name: '', code: '#f1c40f', level: 'Level 11',    background:'background/comingsoon.jpg'},
+    { name: '', code: '#e67e22', level: 'Level 12',        background:'background/comingsoon.jpg'},
     
   ]);
 
   return (
+
+    _retrieveData(),
     <View style={styles.root}>
       <ImageBackground source={require("../../assets/trianglify.png")} style={styles.root}>
       <Text style={styles.text}>Please select the level:</Text>
 
       <FlatGrid
-      itemDimension={130}
+      itemDimension={230}
       data={items}
       style={styles.gridView}
       // staticDimension={300}
       // fixed
       spacing={10}
       renderItem={({ item }) => (
-        <ImageBackground styles={styles.itemContainer} source={require('../../assets/' + item.background)}>
+        
+        <ImageBackground imageStyle={{ borderRadius: 5 }} source={require('../../assets/' + item.background)}>
 
         <View style={[styles.itemContainer]}>
+            <Text style={styles.itemName}>{item.name}</Text>
+
           <Text style={styles.itemName}>{item.level}</Text>
          
         </View>
