@@ -22,6 +22,7 @@ import sprites3 from './src/Sprites/guardSheet';
 
 import MainMenu from "./src/Menu/mainmenu";
 import LevelSelection from "./src/Menu/LevelSelection";
+import { set } from 'gl-matrix/src/gl-matrix/vec2';
 
 require('default-passive-events');
 
@@ -35,6 +36,7 @@ export default class App extends React.Component {
     red: 0, // number of red guards in this level
     max_repetition: 4, // max number of one type of the guard repeats 
     min_repetition: 2,
+
   };
   
   state = {
@@ -86,6 +88,12 @@ export default class App extends React.Component {
       max_repetition: 4, // max number of one type of the guard repeats 
       min_repetition: 1
     }; 
+
+     levels = {
+      1: this.level1_Settings,
+      2: this.level2_Settings,
+      3: this.level3_Settings,
+    }
 
   // a function that saves your data asyncronously
   _storeData = async () => {
@@ -244,6 +252,21 @@ export default class App extends React.Component {
 
     </View>
   );
+
+
+  onPressLevelSelection = (selectedLevel) => {
+
+    console.log("Hello" + selectedLevel)
+    this.setState({
+      currentLevel: this.levels[selectedLevel],
+      level_state: 'create_list',
+    });
+
+
+    console.log(this.state.currentLevel)
+    console.log(this.levels[selectedLevel])
+
+  }
 
 
  checkForResult(userChoice){
@@ -410,20 +433,19 @@ export default class App extends React.Component {
           top: 25,
           left: 25,
         }}>
-          <Card title={"Level " + this.state.currentLevel.level}>
-            {/*react-native-elements Card*/}
+          {/* <Card title={"Level " + this.state.currentLevel.level}>
             <Text style={styles.paragraph}>
               Stage {10 - this.guardsList.length + 1}/10
           </Text>
 
             <Text>5 X
-            {/* <Image
+            <Image
                 style={{ width: '1.5vw', userSelect: 'none', height: '1.5vh', top: 3 }}
                 //source={require('./assets/sleepingSpell.png')}
                 resizeMode="contain"
-              /> */}
+              /> 
             </Text>
-          </Card>
+          </Card> */}
         </View>
 
 
@@ -534,6 +556,8 @@ export default class App extends React.Component {
 
     );
 
+    let selectedLevel = 0;
+
     return (
     
       <div>
@@ -549,7 +573,8 @@ export default class App extends React.Component {
 
           {this.state.isLevelsMenuVisible && (
             <LevelSelection
-              startGame={this.startGame}
+            selectedLevel={selectedLevel}
+            onPressLevelSelection ={this.onPressLevelSelection}
             />
           )}
         {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel)}
