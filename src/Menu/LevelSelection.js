@@ -26,12 +26,12 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel ,props, back}) => {
 
   const [items, setItems] = React.useState([
     { name: 'Mountain', code: '#1abc9c', level: 1, background:'background/mountain.png'},
-    { name: 'Jungle', code: '#2ecc71', level: 2, background:'background/jungle.jpg'},
-    { name: 'Ruins', code: '#3498db', level:  3, background:'background/ruins.png'},
+        { name: 'Desert', code: '#34495e', level: 2, background:'background/desert.png'},
+    { name: 'Winterland', code: '#27ae60', level: 3, background: 'background/winterland.png' },
     { name: 'Underwater', code: '#9b59b6', level: 4, background:'background/underwater.png'},
-    { name: 'Desert', code: '#34495e', level: 5, background:'background/desert.png'},
+    { name: 'Jungle', code: '#2ecc71', level: 5, background: 'background/jungle.jpg' },
     { name: 'Halloween', code: '#16a085', level: 6, background:'background/halloween.png'},
-    { name: 'Winterland', code: '#27ae60', level: 7, background:'background/winterland.png'},
+    { name: 'Ruins', code: '#3498db', level: 7, background: 'background/ruins.png' },
     { name: '', code: '#2980b9', level: 8, background:'background/comingsoon.jpg'},
     { name: '', code: '#8e44ad', level: 9,       background:'background/comingsoon.jpg'},
     { name: '', code: '#2c3e50', level: 10,background:'background/comingsoon.jpg'},
@@ -43,7 +43,7 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel ,props, back}) => {
   
   let doSomething = (level) =>{
     if(level<3)
-    onPressLevelSelection(level)
+      onPressLevelSelection(level)
     else{
       Alert.alert(
         'Alert Title',

@@ -12,6 +12,7 @@ import {Card} from 'react-native-elements';
 
 import CircleButton from './assets/CircleButton';
 
+import WalkingComponent from './src/walking/walking_component'
 
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
 import Game from './src/game';
@@ -26,6 +27,7 @@ import Menu from "./src/Menu/inGameMenu";
 
 import LevelSelection from "./src/Menu/LevelSelection";
 import { set } from 'gl-matrix/src/gl-matrix/vec2';
+import { timingSafeEqual } from 'crypto';
 
 require('default-passive-events');
 
@@ -131,8 +133,8 @@ export default class App extends React.Component {
   _storeData = async () => {
     try {
       await AsyncStorage.setItem('current_level', JSON.stringify(this.state.currentLevel)).then(() => {
-        console.log('It was saved successfully')
-        console.log(JSON.stringify(this.state.currentLevel))
+       // console.log('It was saved successfully')
+     //   console.log(JSON.stringify(this.state.currentLevel))
       })
         .catch(() => {
           console.log('There was an error saving the product')
@@ -212,8 +214,8 @@ export default class App extends React.Component {
 
     }
  
-    console.log(level)
-    console.log(level.background)
+    //console.log(level)
+    //console.log(level.background)
     this.backgroundList = Object.assign([],level.background);
 
 
@@ -286,15 +288,15 @@ export default class App extends React.Component {
 
   onPressLevelSelection = (selectedLevel) => {
 
-    console.log("Hello" + selectedLevel)
+    //console.log("Hello" + selectedLevel)
     this.setState({
       currentLevel: this.levels[selectedLevel],
       level_state: 'create_list',
     });
 
 
-    console.log(this.state.currentLevel)
-    console.log(this.levels[selectedLevel])
+    //console.log(this.state.currentLevel)
+    //console.log(this.levels[selectedLevel])
 
   }
 
@@ -367,6 +369,14 @@ export default class App extends React.Component {
   };
 
 
+  stopWalking = () =>{
+    this.setState({ walking: false }); 
+    this.setState({ level_state: 'levelOne' })
+    this.setState({ result: false });
+  }
+  
+
+
   backToMainMenu = () => {
     this.setState({
       isMainMenuVisible: true,
@@ -381,8 +391,8 @@ export default class App extends React.Component {
       level_state: 'create_list',
     });
 
-    console.log(this.state.level_state)
-    console.log("start game")
+    //console.log(this.state.level_state)
+    //console.log("start game")
   };
 
 
@@ -425,6 +435,27 @@ export default class App extends React.Component {
 
         <DisableBodyScrollingView >
 
+          <View style={{
+            userSelect: 'none',
+            position: 'absolute',
+            top: 20,
+            left: 20,
+          }}>
+            <Card title={"Level " + this.state.currentLevel.level}>
+              <Text style={styles.paragraph}>
+                Stage {10 - this.guardsList.length+1}/10
+          </Text>
+
+              <Text>5 X
+            <Image
+                  style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
+                  source={require('./assets/sleepingSpell.png')}
+                  resizeMode="contain"
+                />
+              </Text>
+            </Card>
+          </View>
+
           <GLView
             style={{ flex: 1, backgroundColor: 'black' }}
             onContextCreate={context => {
@@ -436,7 +467,7 @@ export default class App extends React.Component {
 
                 this.game = new Game(context, bg, this.currentGuard.name);
 
-                console.log(this.currentGuard);
+                //console.log(this.currentGuard);
                 this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
               }
               else{
@@ -447,7 +478,7 @@ export default class App extends React.Component {
 
                 this.game = new Game(context, bg, this.currentGuard.name);
 
-                console.log(this.currentGuard);
+                //console.log(this.currentGuard);
                 this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
               }
 
@@ -480,6 +511,7 @@ export default class App extends React.Component {
           Menu
           </CircleButton>
         
+
         <View
           style={{
             userSelect: 'none',
@@ -513,98 +545,13 @@ export default class App extends React.Component {
           </View>
         </TouchableOpacity>
 
-        <View style={{
-          userSelect: 'none',
-          position: 'absolute',
-          top: 20,
-          left: 20,
-        }}>
-          <Card title={"Level " + this.state.currentLevel.level}>
-            {/*react-native-elements Card*/}
-            <Text style={styles.paragraph}>
-              Stage {10 - this.guardsList.length}/10
-          </Text>
-
-            <Text>5 X
-            <Image
-                style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
-                source={require('./assets/sleepingSpell.png')}
-                resizeMode="contain"
-              />
-            </Text>
-          </Card>
-        </View>
+        
 
 
       </View>
 
     );
 
-
-    const walking = (
-      
-      <View
-        style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}
-      >
-
-        <Modal
-          isVisible={this.state.visibleModal}
-          onBackdropPress={() => this.setState({ visibleModal: false })}
-        >
-
-          {this._renderModalContent()}
-
-        </Modal>
-
-        <Modal
-          isVisible={this.state.visibleLost}
-          onBackdropPress={() => this.setState({ visibleLost: false })}
-        >
-
-          {this._renderModalLost()}
-
-        </Modal>
-
-
-        <DisableBodyScrollingView >
-
-          <GLView
-            style={{ flex: 1, backgroundColor: 'black' }}
-            onContextCreate={context => {
-              this.game = new WalkingObject(context);
-             // this.game.walking = walking => { this.setState({ walking: walking }); if (!walking) this.setState({ level_state: 'levelOne' });};
-             // console.log("Inside walking object: " + this.state.walking )
-            
-
-       }}
-     >
-          </GLView>
-
-        </DisableBodyScrollingView>
-
-        <TouchableOpacity
-          style={{
-            userSelect: 'none',
-            position: 'absolute',
-            bottom: 50,
-            left: 100,
-          }}
-          onPress={() => { this.setState({ walking: false }); this.setState({level_state: 'levelOne'})}}
-          onPressOut={() => { this.setState({ result: false });}}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image
-              style={{ width: 100, userSelect: 'none', height: 100 }}
-              source={require('./assets/binoculars6.png')}
-            />
-          </View>
-        </TouchableOpacity>
-
-
-
-
-      </View>
-
-    );
 
     let selectedLevel = 0;
 
@@ -629,7 +576,10 @@ export default class App extends React.Component {
             />
           )}
         {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel)}
-        {this.state.level_state == 'walking' && walking}
+        {this.state.level_state == 'walking' && (
+        <WalkingComponent
+          stopWalking={this.stopWalking}>
+        </WalkingComponent>)}
         {this.state.level_state == 'levelOne' && levelOne} 
       </div>
 

@@ -4,7 +4,7 @@ import {extras, Sprite } from 'pixi.js';
 import {PixelRatio } from 'react-native';
 
 // Importing backgrounds and assets 
-import source2 from '../assets/ground2.png';
+//import source2 from '../assets/ground2.png';
 import source3 from '../assets/guards/guards.png';
 import groundSouce from '../assets/ground/lvl1.png';
 import penguinSource from '../assets/penguin/penguin1.png';
@@ -64,13 +64,13 @@ class Ground2 extends Sprite {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
-    console.log("SIZE:", Settings.width, Settings.height, scale);
+    //console.log("SIZE:", Settings.width, Settings.height, scale);
    
-    this.height = Settings.height / 2.4;
-    this.width = Settings.width / 1;
+    this.height = Settings.height / 2.2;
+    this.width = Settings.width / 1.05;
 
-    Settings.groundPositionX = 0;
-    Settings.groundPositionY = Settings.height - this.height;
+    Settings.groundPositionX = this.width*0.03;
+    Settings.groundPositionY = (Settings.height - this.height)*1.05;
     
     this.position.x = Settings.groundPositionX;
     this.position.y = Settings.groundPositionY;
@@ -245,7 +245,7 @@ class Game {
     this.textures = await setupSpriteSheetAsync(this.this_background, sprites);
     
     //Linking coordinates and background image
-    this.textures2 = await setupSpriteSheetAsync(source2, sprites2);
+    //this.textures2 = await setupSpriteSheetAsync(source2, sprites2);
 
     //Linking guards and background image
     this.guardTextute = await setupSpriteSheetAsync(source3, sprites3);
@@ -330,13 +330,14 @@ class Game {
     this.ground2.moveGround = false;
     this.moveBack();
     this.bird.animationSpeed = 0;
+    
   }
 
   
   beginGame = () => {
     if (!this.isStarted) {
       this.isStarted = true;
-      console.log("BeginGame");
+     // console.log("BeginGame");
     }
   };
 
@@ -376,12 +377,12 @@ class Game {
   //This function will dislpay a lose message, if user holds button for too long 
   loseMessage() {
     if (!this.isButtonReleased) {
-      console.log("Lose Message!");
+      //console.log("Lose Message!");
       this.caughtMessage.position.y = Settings.height * 0.4;
       this.userLost = true;
     }
     else { // Some debugging 
-      console.log("Button was released!");
+      //console.log("Button was released!");
     }
   }
 
