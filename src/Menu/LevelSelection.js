@@ -20,25 +20,6 @@ import colors from "../../assets/constants/colors";
 import Button from "../../assets/Button";
 
 
-let highestLevel = 1;
-
-// _retrieveData = async () => {
-//   try {
-//     const highest_level = await AsyncStorage.getItem('highest_level');
-//     if (highest_level !== null) {
-//       // Our data is fetched successfully
-//       console.log(highest_level.toString())
-//       this.highestLevel = highest_level;
-//     }
-//     else {
-//       console.log("null")
-//     }
-//   } catch (error) {
-//     // Error retrieving data
-//   }
-// }
-
-
 let LevelSelection = ({ onPressLevelSelection, selectedLevel,props}) => {
   
 
@@ -62,9 +43,9 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel,props}) => {
  
 
   let doSomething = (props) => {
-    // props.onPressLevelSelection('placeholder for x');
 
     console.log(props)
+    
   }
 
   return (

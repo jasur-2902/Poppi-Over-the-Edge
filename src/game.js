@@ -6,7 +6,7 @@ import {PixelRatio } from 'react-native';
 // Importing backgrounds and assets 
 import source2 from '../assets/ground2.png';
 import source3 from '../assets/guards/guards10.png';
-import groundSouce from '../assets/ground/ground3.png';
+import groundSouce from '../assets/ground/lvl1.png';
 import penguinSource from '../assets/penguin/penguin1.png';
 
 
@@ -67,9 +67,9 @@ class Ground2 extends Sprite {
     console.log("SIZE:", Settings.width, Settings.height, scale);
    
     this.height = Settings.height / 2.4;
-    this.width = Settings.width / 1.1;
+    this.width = Settings.width / 1;
 
-    Settings.groundPositionX = Settings.width / 20;
+    Settings.groundPositionX = 0;
     Settings.groundPositionY = Settings.height - this.height;
     
     this.position.x = Settings.groundPositionX;

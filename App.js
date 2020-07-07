@@ -1,6 +1,6 @@
 import { GLView } from 'expo';
 import * as React from 'react';
-import { Image, Text, View, TouchableOpacity } from 'react-native';
+import { Image, Text, View, TouchableOpacity, ImageBackground } from 'react-native';
 
 //import Modal from 'modal-react-native-web';
 import Modal from 'modal-enhanced-react-native-web';
@@ -8,8 +8,9 @@ import Modal from 'modal-enhanced-react-native-web';
 //importing styles 
 import styles from "./src/styles";
 
-import Card from 'react-native-elements';
+import {Card} from 'react-native-elements';
 
+import CircleButton from './assets/CircleButton';
 
 
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
@@ -21,6 +22,8 @@ import WalkingObject from './src/walking';
 import sprites3 from './src/Sprites/guardSheet';
 
 import MainMenu from "./src/Menu/mainmenu";
+import Menu from "./src/Menu/inGameMenu";
+
 import LevelSelection from "./src/Menu/LevelSelection";
 import { set } from 'gl-matrix/src/gl-matrix/vec2';
 
@@ -55,7 +58,16 @@ export default class App extends React.Component {
     highestLevel: 1, 
     isMainMenuVisible: true, 
     isLevelsMenuVisible: false, 
+    isInGameMenuVisible: false,
+
   };
+
+  onMenuToggle = () => {
+    this.setState((state) => ({
+      isMenuVisible: !state.isMenuVisible,
+    }));
+  };
+
 
   refreshScreen() {
     this.refreshScreen.bind(this)
@@ -182,16 +194,17 @@ export default class App extends React.Component {
     console.log(this.guardsList);
     console.log(dic);
 
-    this.backgroundList.push("background2.png");
-    this.backgroundList.push("background.png");
-    this.backgroundList.push("background2.png");
-    this.backgroundList.push("background.png");
-    this.backgroundList.push("background2.png");
-    this.backgroundList.push("background.png");
-    this.backgroundList.push("background2.png");
-    this.backgroundList.push("background.png");
-    this.backgroundList.push("background2.png");
-    this.backgroundList.push("background.png");
+    this.backgroundList.push("background/lvl1_2.png");
+    this.backgroundList.push("background/lvl1_1.png");
+    this.backgroundList.push("background/lvl1_2.png");
+    this.backgroundList.push("background/lvl1_1.png");
+    this.backgroundList.push("background/lvl1_2.png");
+    this.backgroundList.push("background/lvl1_1.png");
+    this.backgroundList.push("background/lvl1_2.png");
+    this.backgroundList.push("background/lvl1_1.png");
+    this.backgroundList.push("background/lvl1_2.png");
+    this.backgroundList.push("background/lvl1_1.png");
+
 
     this.setState({ level_state: 'levelOne' }); 
     
@@ -244,7 +257,12 @@ export default class App extends React.Component {
         // Hide the content in screen when state object "content" is false. 
         this.state.win ? <Text style={styles.headerText}> {"\n"}Congratulations, you won!
 
-        {this._renderButton("Next Level", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'create_list' }); this.setState({ currentLevel: this.level3_Settings, win: false, isListEmpty:false });})}
+        {
+          this._renderButton("Next Level", () => { 
+            this.setState({ level_1: false }); 
+            this.setState({ visibleModal: false }); 
+            this.setState({ level_state: 'create_list' }); 
+            this.setState({ currentLevel: this.levels[this.state.currentLevel.level++], win: false, isListEmpty:false });})}
 
         </Text> : null
 
@@ -427,27 +445,63 @@ export default class App extends React.Component {
 
         </DisableBodyScrollingView>
        
+        {this.state.isInGameMenuVisible && (
+          <Menu
+            onMenuToggle={this.onMenuToggle}
+          />
+        )}
+
+        <CircleButton
+          onPress={this.onMenuToggle}
+          style={{
+       
+            position: "absolute",
+            top: 25,
+            right: 25,
+          }}>
+          Menu
+          </CircleButton>
+
         <View style={{
           userSelect: 'none',
           position: 'absolute',
-          top: 25,
-          left: 25,
+          top: 20,
+          left: 20,
         }}>
-          {/* <Card title={"Level " + this.state.currentLevel.level}>
+          <Card title={"Level " + this.state.currentLevel.level}>
+            {/*react-native-elements Card*/}
             <Text style={styles.paragraph}>
               Stage {10 - this.guardsList.length + 1}/10
           </Text>
 
             <Text>5 X
             <Image
-                style={{ width: '1.5vw', userSelect: 'none', height: '1.5vh', top: 3 }}
-                //source={require('./assets/sleepingSpell.png')}
+                style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
+                source={require('./assets/sleepingSpell.png')}
                 resizeMode="contain"
-              /> 
+              />
             </Text>
-          </Card> */}
+          </Card>
         </View>
-
+        
+        <View
+          style={{
+            userSelect: 'none',
+            position: 'absolute',
+            bottom: 50,
+            left: 100,
+          }}
+          onLongPress={() => { this.game.onPress(); console.log("it's been pressed"); }}
+          onPressOut={() => { this.displayQuestions() }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
+            <Image
+              style={{ width: 100, userSelect: 'none', height: 100 }}
+              source={require('./assets/binoculars6.png')}
+              resizeMode="contain"
+            />
+            {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
+          </View>
+        </View>
 
         <TouchableOpacity
           style={{
@@ -458,15 +512,16 @@ export default class App extends React.Component {
           }}
           onLongPress={() => { this.game.onPress(); console.log("it's been pressed"); }}
           onPressOut={() => { this.displayQuestions() }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image
+          <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
+            {/* <Image
               style={{ width: '10vw', userSelect: 'none', height: '10vh' }}
               source={require('./assets/binoculars6.png')}
               resizeMode="contain"
-            />
+            /> */}
             {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
           </View>
         </TouchableOpacity>
+
 
 
         {/* <View style={{ 

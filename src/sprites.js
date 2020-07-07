@@ -1,5 +1,5 @@
 export default [
-  { name: 'background', x: 0, y: 0, width: 600, height: 400 },
+  { name: 'background', x: 0, y: 0, width: 1920, height: 1269 },
   { name: 'boxes', x: 145, y: 0, width: 26, height: 160 },
 
 

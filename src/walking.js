@@ -2,7 +2,7 @@ import { PIXI } from 'expo-pixi';
 import { extras, Sprite } from 'pixi.js';
 import { PixelRatio } from 'react-native';
 
-import source from '../assets/background/walkingToLvl2.png';
+import source from '../assets/background/walking.png';
 import penguinSource from '../assets/penguin/penguin1.png';
 
 import setupSpriteSheetAsync from './setupSpriteSheetAsync';

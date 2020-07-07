@@ -38,7 +38,7 @@ const Menu = ({ numPlayers, onNumPlayersChange, startGame, levelSelectionMenu })
             selected={numPlayers === 2}
             style={styles.button}
           >
-           <Text style={styles.button_text}>HELP</Text>
+           <Text style={styles.button_text}>LEARN</Text>
           </Button>
           
           {/* {Platform.OS !== "web" && music && (
