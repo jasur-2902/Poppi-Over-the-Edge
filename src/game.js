@@ -5,7 +5,7 @@ import {PixelRatio } from 'react-native';
 
 // Importing backgrounds and assets 
 import source2 from '../assets/ground2.png';
-import source3 from '../assets/guards/guards10.png';
+import source3 from '../assets/guards/guards.png';
 import groundSouce from '../assets/ground/lvl1.png';
 import penguinSource from '../assets/penguin/penguin1.png';
 

@@ -34,8 +34,6 @@ const Menu = ({ numPlayers, onNumPlayersChange, startGame, levelSelectionMenu })
              <Text style={styles.button_text}>SELECT LEVEL</Text>
           </Button>
           <Button
-            onPress={() => onNumPlayersChange(2)}
-            selected={numPlayers === 2}
             style={styles.button}
           >
            <Text style={styles.button_text}>LEARN</Text>

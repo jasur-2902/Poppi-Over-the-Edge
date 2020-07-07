@@ -51,6 +51,24 @@ export default [
     { name: 'guard43', number: 3, color: 'yellow', x: 1950, y: 200, width: 150, height: 200 },
     { name: 'guard44', number: 3, color: 'yellow', x: 2100, y: 200, width: 150, height: 200 },
 
+    
+    { name: 'guard45', number: 1, color: 'green', x: 2400, y: 0, width: 150, height: 200 },
+    { name: 'guard46', number: 1, color: 'yellow', x: 2550, y: 0, width: 150, height: 200 },
+    { name: 'guard47', number: 1, color: 'yellow', x: 2700, y: 0, width: 150, height: 200 },
+    { name: 'guard48', number: 1, color: 'yellow', x: 2850, y: 0, width: 150, height: 200 },
+
+    { name: 'guard49', number: 2, color: 'green', x: 3000, y: 0, width: 150, height: 200 },
+    { name: 'guard50', number: 2, color: 'green', x: 3150, y: 0, width: 150, height: 200 },
+    { name: 'guard51', number: 2, color: 'yellow', x: 3300, y: 0, width: 150, height: 200 },
+    { name: 'guard52', number: 2, color: 'yellow', x: 2400, y: 200, width: 150, height: 200 },
+    { name: 'guard53', number: 2, color: 'green', x: 2550, y: 200, width: 150, height: 200 },
+    { name: 'guard54', number: 2, color: 'red', x: 2700, y: 200, width: 150, height: 200 },
+
+    { name: 'guard55', number: 3, color: 'green', x: 2850, y: 200, width: 150, height: 200 },
+    { name: 'guard56', number: 3, color: 'green', x: 3000, y: 200, width: 150, height: 200 },
+    { name: 'guard57', number: 3, color: 'yellow', x: 3150, y: 200, width: 150, height: 200 },
+    { name: 'guard58', number: 3, color: 'yellow', x: 3300, y: 200, width: 150, height: 200 },
+
 
     { name: 'message', x: 1050, y: 0, width: 150, height: 200 },
 

@@ -31,6 +31,14 @@ require('default-passive-events');
 
 export default class App extends React.Component {
   
+
+
+  level1_backgrounds = ['background/lvl1_2.png', 'background/lvl1_1.png',
+    'background/lvl1_2.png', 'background/lvl1_1.png',
+    'background/lvl1_2.png', 'background/lvl1_1.png',
+    'background/lvl1_2.png', 'background/lvl1_1.png',
+    'background/lvl1_2.png', 'background/lvl1_1.png'];
+
   level1_Settings = {
     level: 1, //level 
     max: 3, // maximum number of guards
@@ -39,9 +47,38 @@ export default class App extends React.Component {
     red: 0, // number of red guards in this level
     max_repetition: 4, // max number of one type of the guard repeats 
     min_repetition: 2,
+    background: this.level1_backgrounds,
+  };
+
+
+  level2_backgrounds = ['background/3.png', 'background/3.png',
+    'background/3.png', 'background/3.png',
+    'background/3.png', 'background/3.png',
+    'background/3.png', 'background/3.png',
+    'background/3.png', 'background/3.png'];
+  
+  level2_Settings = {
+    level: 2, //level 
+    max: 3, // maximum number of guards
+    green: 6, // number of green guards in this level
+    yellow: 4, // number of yellow guards in this level
+    red: 0, // number of red guards in this level
+    max_repetition: 4, // max number of one type of the guard repeats 
+    min_repetition: 2,
+    background: this.level2_backgrounds,
 
   };
-  
+
+  level3_Settings = {
+    level: 3, //level 
+    max: 4, // maximum number of guards
+    green: 5, // number of green guards in this level
+    yellow: 3, // number of yellow guards in this level
+    red: 2, // number of red guards in this level
+    max_repetition: 4, // max number of one type of the guard repeats 
+    min_repetition: 1
+  }; 
+
   state = {
     level_state: 'menu',
     sleepingPills: 0,
@@ -64,7 +101,7 @@ export default class App extends React.Component {
 
   onMenuToggle = () => {
     this.setState((state) => ({
-      isMenuVisible: !state.isMenuVisible,
+      isInGameMenuVisible: !this.state.isInGameMenuVisible,
     }));
   };
 
@@ -75,31 +112,14 @@ export default class App extends React.Component {
 
   guardsList = [];
   backgroundList=[]; 
-  numberOfCards = 44;
+  numberOfCards = 58;
 
   game = null;
 
+
   currentGuard; 
   
-    level2_Settings = {
-      level: 2, //level 
-      max: 3, // maximum number of guards
-      green: 6, // number of green guards in this level
-      yellow: 4, // number of yellow guards in this level
-      red: 0, // number of red guards in this level
-      max_repetition: 4, // max number of one type of the guard repeats 
-      min_repetition: 2
-    };
-
-    level3_Settings = {
-      level: 3, //level 
-      max: 4, // maximum number of guards
-      green: 5, // number of green guards in this level
-      yellow: 3, // number of yellow guards in this level
-      red: 2, // number of red guards in this level
-      max_repetition: 4, // max number of one type of the guard repeats 
-      min_repetition: 1
-    }; 
+  
 
      levels = {
       1: this.level1_Settings,
@@ -191,19 +211,11 @@ export default class App extends React.Component {
       }
 
     }
-    console.log(this.guardsList);
-    console.log(dic);
+ 
+    console.log(level)
+    console.log(level.background)
+    this.backgroundList = Object.assign([],level.background);
 
-    this.backgroundList.push("background/lvl1_2.png");
-    this.backgroundList.push("background/lvl1_1.png");
-    this.backgroundList.push("background/lvl1_2.png");
-    this.backgroundList.push("background/lvl1_1.png");
-    this.backgroundList.push("background/lvl1_2.png");
-    this.backgroundList.push("background/lvl1_1.png");
-    this.backgroundList.push("background/lvl1_2.png");
-    this.backgroundList.push("background/lvl1_1.png");
-    this.backgroundList.push("background/lvl1_2.png");
-    this.backgroundList.push("background/lvl1_1.png");
 
 
     this.setState({ level_state: 'levelOne' }); 
@@ -262,7 +274,7 @@ export default class App extends React.Component {
             this.setState({ level_1: false }); 
             this.setState({ visibleModal: false }); 
             this.setState({ level_state: 'create_list' }); 
-            this.setState({ currentLevel: this.levels[this.state.currentLevel.level++], win: false, isListEmpty:false });})}
+            this.setState({ currentLevel: this.levels[(this.state.currentLevel.level + 1)], win: false, isListEmpty:false });})}
 
         </Text> : null
 
@@ -344,18 +356,22 @@ export default class App extends React.Component {
 
 
   levelSelectionMenu = () => {
-    this.setState({
-      isLevelsMenuVisible: true,
-    }); 
+    
+        this.setState({
+          isLevelsMenuVisible: !this.state.isLevelsMenuVisible,
+        });
+      
 
-    this._storeData();
-    this._retrieveData();
+    // this._storeData();
+    // this._retrieveData();
   };
 
 
   backToMainMenu = () => {
     this.setState({
       isMainMenuVisible: true,
+      level_state: 'menu',
+      isInGameMenuVisible: false,
     });
   };
 
@@ -447,8 +463,10 @@ export default class App extends React.Component {
        
         {this.state.isInGameMenuVisible && (
           <Menu
-            onMenuToggle={this.onMenuToggle}
+            backToMainMenu = {this.backToMainMenu}
+            onMenuToggle = {this.onMenuToggle}
           />
+
         )}
 
         <CircleButton
@@ -461,28 +479,6 @@ export default class App extends React.Component {
           }}>
           Menu
           </CircleButton>
-
-        <View style={{
-          userSelect: 'none',
-          position: 'absolute',
-          top: 20,
-          left: 20,
-        }}>
-          <Card title={"Level " + this.state.currentLevel.level}>
-            {/*react-native-elements Card*/}
-            <Text style={styles.paragraph}>
-              Stage {10 - this.guardsList.length + 1}/10
-          </Text>
-
-            <Text>5 X
-            <Image
-                style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
-                source={require('./assets/sleepingSpell.png')}
-                resizeMode="contain"
-              />
-            </Text>
-          </Card>
-        </View>
         
         <View
           style={{
@@ -513,32 +509,31 @@ export default class App extends React.Component {
           onLongPress={() => { this.game.onPress(); console.log("it's been pressed"); }}
           onPressOut={() => { this.displayQuestions() }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
-            {/* <Image
-              style={{ width: '10vw', userSelect: 'none', height: '10vh' }}
-              source={require('./assets/binoculars6.png')}
-              resizeMode="contain"
-            /> */}
-            {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
+        
           </View>
         </TouchableOpacity>
 
-
-
-        {/* <View style={{ 
-          flexDirection: 'row', alignItems: 'center',
+        <View style={{
           userSelect: 'none',
           position: 'absolute',
-          top: 50,
-          right: 100,}}>
-          <Image
-            
-            style={{ width: '5vw', userSelect: 'none', height: '5vh' }}
-            source={require('./assets/sleepingSpell.png')}
-            resizeMode="contain"
-          />
-          
-           </View> */}
+          top: 20,
+          left: 20,
+        }}>
+          <Card title={"Level " + this.state.currentLevel.level}>
+            {/*react-native-elements Card*/}
+            <Text style={styles.paragraph}>
+              Stage {10 - this.guardsList.length}/10
+          </Text>
 
+            <Text>5 X
+            <Image
+                style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
+                source={require('./assets/sleepingSpell.png')}
+                resizeMode="contain"
+              />
+            </Text>
+          </Card>
+        </View>
 
 
       </View>
@@ -630,6 +625,7 @@ export default class App extends React.Component {
             <LevelSelection
             selectedLevel={selectedLevel}
             onPressLevelSelection ={this.onPressLevelSelection}
+            back={this.levelSelectionMenu}
             />
           )}
         {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel)}

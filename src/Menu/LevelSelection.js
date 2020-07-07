@@ -9,6 +9,7 @@ import {
   FlatList,
   AsyncStorage,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 
 import { FlatGrid } from 'react-native-super-grid';
@@ -20,7 +21,7 @@ import colors from "../../assets/constants/colors";
 import Button from "../../assets/Button";
 
 
-let LevelSelection = ({ onPressLevelSelection, selectedLevel,props}) => {
+let LevelSelection = ({ onPressLevelSelection, selectedLevel ,props, back}) => {
   
 
   const [items, setItems] = React.useState([
@@ -40,17 +41,31 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel,props}) => {
   ]);
 
   
- 
-
-  let doSomething = (props) => {
-
-    console.log(props)
-    
+  let doSomething = (level) =>{
+    if(level<3)
+    onPressLevelSelection(level)
+    else{
+      Alert.alert(
+        'Alert Title',
+        'My Alert Msg',
+        [
+          {
+            text: 'Ask me later',
+            onPress: () => console.log('Ask me later pressed')
+          },
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel'
+          },
+          { text: 'OK', onPress: () => console.log('OK Pressed') }
+        ],
+        { cancelable: false }
+      );
+    }
   }
 
   return (
-
-    // this._retrieveData(),
     <View style={styles.root}>
       <ImageBackground source={require("../../assets/trianglify.png")} style={styles.root}>
       <Text style={styles.text}>Please select the level:</Text>
@@ -64,9 +79,10 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel,props}) => {
       spacing={10}
       renderItem={({ item }) => (
         <View>
-          <TouchableOpacity 
-            onPress={() => onPressLevelSelection(item.level )}>
-          <ImageBackground imageStyle={{ borderRadius: 5 }} source={require('../../assets/' + item.background)}>
+       
+          <TouchableOpacity
+            onPress={() =>  doSomething(item.level)}>
+          <ImageBackground  imageStyle={{ borderRadius: 5 }} source={require('../../assets/' + item.background)}>
 
           <View style={[styles.itemContainer]}>
               <Text style={styles.itemName}>{item.name}</Text>
@@ -79,6 +95,15 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel,props}) => {
         </View>
       )}
     />   
+        <Button
+          onPress={back}
+          style={{
+            position: "absolute",
+            bottom: 25,
+            right: 25,
+          }}>
+          Back
+          </Button>
       </ImageBackground>
     </View>
 
