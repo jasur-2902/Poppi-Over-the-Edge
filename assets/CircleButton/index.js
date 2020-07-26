@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
   button: {
     alignItems: "center",
     justifyContent: "center",
-    width: 100,
-    height: 64,
+    width: 80,
+    height: 50,
     backgroundColor: "#C5E5F0",
     borderRadius: 16,
     borderWidth: 4,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: "Dimbo",
-    fontSize: 25,
+    fontSize: 20,
     color: colors.grayDark,
   },
 });

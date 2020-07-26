@@ -28,6 +28,7 @@ const scale = PixelRatio.get();
 //Level Settings
 let crnt_level = 1; 
 
+
 // Game settings Configurations
 let Settings = {
   playerFallSpeed: 0 * scale,
@@ -42,7 +43,8 @@ let Settings = {
   gameSpeed: 15 * 0.25, // Game speed 
   guardWidth: 140 * scale,
   guardHeight: 140 * scale,
-  secondCloudPositionY: 0
+  secondCloudPositionY: 0,
+  caughtMessageTime: 2500,
 };
 
 
@@ -66,10 +68,10 @@ class Ground2 extends Sprite {
 
     //console.log("SIZE:", Settings.width, Settings.height, scale);
    
-    this.height = Settings.height / 2.2;
-    this.width = Settings.width / 1.05;
+    this.height = Settings.height / 1.2;
+    this.width = Settings.width / 1.00;
 
-    Settings.groundPositionX = this.width*0.03;
+    Settings.groundPositionX = this.width*0.00;
     Settings.groundPositionY = (Settings.height - this.height)*1.05;
     
     this.position.x = Settings.groundPositionX;
@@ -124,9 +126,9 @@ class CaughtMessage extends Sprite {
     this.scale.set(scale * 2);
 
     //TODO Make it scalable 
-    this.width = Settings.width/8;
-    this.height = Settings.height/6;
-    this.position.x = Settings.width/2;
+    this.width = Settings.width/6;
+    this.height = Settings.height/3;
+    this.position.x = Settings.width/2.5;
     this.position.y = Settings.skyHeight ;
 
   }
@@ -140,10 +142,10 @@ class Guard extends Sprite {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
-    this.width = Settings.width/8;
-    this.height = Settings.height/4;
+    this.width = Settings.width/3.5;
+    this.height = Settings.height/1.8;
 
-    this.position.x = Settings.width/2;
+    this.position.x = Settings.width/2.5;
     this.position.y = Settings.height; 
   }
 }
@@ -169,8 +171,8 @@ class Bird extends AnimatedSprite {
     super(textures);
     this.animationSpeed = 0.00;
     this.anchor.set(0.5);
-    this.width = Settings.width/20;
-    this.height = Settings.height/15;
+    this.width = Settings.width/8;
+    this.height = Settings.height/4.1;
 
     this.speedY = Settings.playerFallSpeed;
     this.rate = Settings.playerGravity;
@@ -182,8 +184,8 @@ class Bird extends AnimatedSprite {
   restart = () => {
     this.play();
     this.rotation = 0;
-    this.position.x = Settings.width/2 ;
-    this.position.y = Settings.height/1.1;
+    this.position.x = Settings.width/2;
+    this.position.y = Settings.height/1.15;
   };
 
 }
@@ -291,7 +293,7 @@ class Game {
  
  
     // Adding objects to the screen 
-    [this.background, this.guard, this.caughtMessage, this.edge, this.ground2, this.cloud, this.bird].map(child =>
+    [this.background, this.guard, this.caughtMessage, this.ground2 , this.bird].map(child =>
       this.app.stage.addChild(child),
     );
 
@@ -317,10 +319,7 @@ class Game {
 
       this.beginGame();
     
-    //TODO Make 2500 global, this is time after which lose message will be displayed 
-    setTimeout(() => {
-      this.loseMessage();
-    }, 2000);
+   
 
   }; 
 
@@ -349,8 +348,10 @@ class Game {
 
     // If game is started and button was pressed 
     if (this.isStarted && this.ground2.moveGround ){
-
-      this.moveToTheEdge();
+      setTimeout(() => {
+        this.moveToTheEdge();
+      }, 300);
+     
     }
 
   };
@@ -360,9 +361,42 @@ class Game {
     if (!this.ground2.groundDown) {
       this.ground2.position.y += Settings.gameSpeed;
       this.edge.position.y += Settings.gameSpeed;
-      if (this.ground2.position.y > Settings.height*0.7)
+      
+      // Variable to control how much down to move edge of the castle
+      let edgeDownLevel = Settings.height * 0.5;
+
+      // Variable to control how high to move guards of the castle
+      let guardsUpLevel = Settings.height / 5.5;
+ 
+      // when poppi reaches the eadge
+      if (this.ground2.position.y > edgeDownLevel ){
         this.ground2.groundDown = true;
-        this.guard.position.y = Settings.height/2.5;
+        this.binocularState = true;
+        this.onScore(this.binocularState)
+        // this.bird.position.y = Settings.height / 1.14;
+        setTimeout(() => {
+
+          //Moving guards to top making them visible 
+          this.guard.position.y = guardsUpLevel;
+          
+          // Stopping bird moving 
+          this.bird.animationSpeed = 0.00;
+
+
+          //Poppi's head pops up in the binocular view, so I am moving it a little bit down
+          
+
+          // Making edge invisible
+          this.ground2.position.y = Settings.skyHeight;
+
+        }, 200);
+       
+        //TODO Make 2500 global, this is time after which lose message will be displayed 
+        setTimeout(() => {
+          this.loseMessage();
+        }, Settings.caughtMessageTime); 
+
+      }
     }
     else if (this.ground2.position.x > Settings.skyHeight) {
       this.ground2.position.x += Settings.gameSpeed;
@@ -378,17 +412,18 @@ class Game {
   loseMessage() {
     if (!this.isButtonReleased) {
       //console.log("Lose Message!");
-      this.caughtMessage.position.y = Settings.height * 0.4;
+      this.caughtMessage.position.y = Settings.height * 0.3;
       this.userLost = true;
     }
     else { // Some debugging 
-      //console.log("Button was released!");
+      this.ground2.position.y = Settings.groundPositionY;
     }
   }
 
-  moveBack = () => {
+  moveBack() {
     this.ground2.position.y = Settings.groundPositionY;
     this.edge.position.y = Settings.secondCloudPositionY;
+    this.bird.position.y = Settings.height/1.2;
   };
 
   restart = () => {

@@ -18,7 +18,7 @@
     "modal-enhanced-react-native-web": "^0.2.0",
     "modal-react-native-web": "^0.2.0",
     "moment": "^2.24.0",
-    "react": "16.8.6",
+    "react": "^16.13.1",
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-countdown-component": "^2.7.1",

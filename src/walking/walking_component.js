@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
-import { StyleSheet, TouchableOpacity, View, Image } from "react-native";
+import React, { useRef, useEffect } from "react";
+
+import { Animated, StyleSheet, TouchableOpacity, View, Image } from "react-native";
 
 import colors from "../../assets/constants/colors";
 import DisableBodyScrollingView from '../../components/DisableBodyScrollingView';
@@ -11,7 +12,7 @@ import { PIXI } from 'expo-pixi';
 import { extras, Sprite } from 'pixi.js';
 import { PixelRatio } from 'react-native';
 
-import source from '../../assets/background/walking.png';
+import source from '../../assets/background/walking2.png';
 import penguinSource from '../../assets/penguin/penguin1.png';
 
 import setupSpriteSheetAsync from '../setupSpriteSheetAsync';
@@ -26,6 +27,20 @@ let game;
 
 const WalkingComponent = ({ stopWalking }) => {
 
+    const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
+
+
+    React.useEffect(() => {
+        Animated.timing(
+            fadeAnim,
+            {
+                toValue: 1,
+                duration: 1000,
+            }
+        ).start();
+    }, [fadeAnim])
+
+
 
     let doSomething = () => {
         stopWalking()
@@ -33,7 +48,8 @@ const WalkingComponent = ({ stopWalking }) => {
     }
 
     return (
-        <View
+        <View>
+        <Animated.View
             style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}
         >
 
@@ -77,6 +93,7 @@ const WalkingComponent = ({ stopWalking }) => {
             </CircleButton>
 
 
+        </Animated.View>
         </View>
     );
 
@@ -122,7 +139,7 @@ let Settings = {
     playerGravity: 0 * scale,
     minPipeHeight: 50 * scale,
     pipeVerticalGap: 190 * scale, //180 is pretty legit
-    gameSpeed: 25 * 0.25,
+    gameSpeed: 35 * 0.25,
     guardWidth: 200 * scale,
     guardHeight: 200 * scale
 };
@@ -156,8 +173,8 @@ class Bird extends AnimatedSprite {
         super(textures);
         this.animationSpeed = 0.00;
         this.anchor.set(0.5);
-        this.width = Settings.width / 17;
-        this.height = Settings.height / 12;
+        this.width = Settings.width / 8;
+        this.height = Settings.height / 4;
 
         this.speedY = Settings.playerFallSpeed;
         this.rate = Settings.playerGravity;
@@ -252,7 +269,7 @@ class Game {
 
         this.bird.animationSpeed = 0.2;
 
-        if (this.bird.position.x < Settings.width * 0.6) {
+        if (this.bird.position.x < Settings.width * 0.8) {
             this.bird.position.x += Settings.gameSpeed;
             this.bird.animationSpeed = 0.1;
 

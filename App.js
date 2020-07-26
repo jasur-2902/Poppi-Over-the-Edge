@@ -1,6 +1,9 @@
 import { GLView } from 'expo';
+
 import * as React from 'react';
-import { Image, Text, View, TouchableOpacity, ImageBackground } from 'react-native';
+
+
+import {Image, Text, View, TouchableOpacity, ImageBackground } from 'react-native';
 
 //import Modal from 'modal-react-native-web';
 import Modal from 'modal-enhanced-react-native-web';
@@ -24,6 +27,7 @@ import sprites3 from './src/Sprites/guardSheet';
 
 import MainMenu from "./src/Menu/mainmenu";
 import Menu from "./src/Menu/inGameMenu";
+import Binocular from "./src/Binocular/binocular"
 
 import LevelSelection from "./src/Menu/LevelSelection";
 import { set } from 'gl-matrix/src/gl-matrix/vec2';
@@ -35,11 +39,11 @@ export default class App extends React.Component {
   
 
 
-  level1_backgrounds = ['background/lvl1_2.png', 'background/lvl1_1.png',
-    'background/lvl1_2.png', 'background/lvl1_1.png',
-    'background/lvl1_2.png', 'background/lvl1_1.png',
-    'background/lvl1_2.png', 'background/lvl1_1.png',
-    'background/lvl1_2.png', 'background/lvl1_1.png'];
+  level1_backgrounds = ['background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png'];
 
   level1_Settings = {
     level: 1, //level 
@@ -98,7 +102,7 @@ export default class App extends React.Component {
     isMainMenuVisible: true, 
     isLevelsMenuVisible: false, 
     isInGameMenuVisible: false,
-
+    isBinocularVisible: false, 
   };
 
   onMenuToggle = () => {
@@ -349,7 +353,7 @@ export default class App extends React.Component {
 
     if(!this.game.userLost)
       {
-        this.game.onPressOut(); this.setState({ visibleModal: true }); this.game.isButtonReleased = true
+        this.game.onPressOut(); this.setState({ visibleModal: true }); this.game.isButtonReleased = true;
       }
     else{
       this.setState({ visibleCaught: true });
@@ -395,17 +399,43 @@ export default class App extends React.Component {
     //console.log("start game")
   };
 
+   toggleBinocular = () => {
+     this.setState((state) => ({
+       isBinocularVisible: !this.state.isBinocularVisible,
+     }));
+    }
+
+   
+
+   _start = () => {
+    Animated.timing(this.fadeAnim.fadeValue, {
+      toValue: 1,
+      duration: 1000
+    }).start();
+  };
+  
+
 
   render() {
     const { style, ...props } = this.props;
 
   
+    // const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
+
+
+   
+
+   
+
+
     const levelOne = (
 
+    
       <View
         style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}
       >
 
+       
         <Modal
           isVisible={this.state.visibleModal}
         // onBackdropPress={() => this.setState({ visibleModal: false })}
@@ -438,8 +468,9 @@ export default class App extends React.Component {
           <View style={{
             userSelect: 'none',
             position: 'absolute',
-            top: 20,
-            left: 20,
+            top: 15,
+            left: 15,
+       
           }}>
             <Card title={"Level " + this.state.currentLevel.level}>
               <Text style={styles.paragraph}>
@@ -468,7 +499,7 @@ export default class App extends React.Component {
                 this.game = new Game(context, bg, this.currentGuard.name);
 
                 //console.log(this.currentGuard);
-                this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
+                this.game.onScore = binocularState => this.toggleBinocular(binocularState);
               }
               else{
                 this.setState({ isListEmpty: true })
@@ -500,6 +531,10 @@ export default class App extends React.Component {
 
         )}
 
+        {this.state.isBinocularVisible && (<Binocular
+          
+        />)}
+
         <CircleButton
           onPress={this.onMenuToggle}
           style={{
@@ -519,14 +554,16 @@ export default class App extends React.Component {
             bottom: 50,
             left: 100,
           }}
-          onLongPress={() => { this.game.onPress(); console.log("it's been pressed"); }}
-          onPressOut={() => { this.displayQuestions() }}>
+         
+          >
+          
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
             <Image
               style={{ width: 100, userSelect: 'none', height: 100 }}
               source={require('./assets/binoculars6.png')}
               resizeMode="contain"
             />
+
             {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
           </View>
         </View>
@@ -538,8 +575,11 @@ export default class App extends React.Component {
             bottom: 50,
             left: 100,
           }}
-          onLongPress={() => { this.game.onPress(); console.log("it's been pressed"); }}
-          onPressOut={() => { this.displayQuestions() }}>
+          onLongPress={() => {
+            this.game.onPress(); console.log("it's been pressed"); }}
+          onPressOut={() => { this.displayQuestions(); this.toggleBinocular()  }}
+          
+          >
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
         
           </View>
@@ -554,6 +594,10 @@ export default class App extends React.Component {
 
 
     let selectedLevel = 0;
+
+
+
+
 
     return (
     
@@ -575,7 +619,7 @@ export default class App extends React.Component {
             back={this.levelSelectionMenu}
             />
           )}
-        {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel)}
+        {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel) }
         {this.state.level_state == 'walking' && (
         <WalkingComponent
           stopWalking={this.stopWalking}>
@@ -588,20 +632,3 @@ export default class App extends React.Component {
 
   }
 }
-
-const SleepingPills = ({ children }) => (
-  <Text
-    style={{
-      position: 'absolute',
-      left: 0,
-      top: '10%',
-      right: 0,
-      textAlign: 'center',
-      color: 'white',
-      fontSize: 48,
-      userSelect: 'none',
-    }}
-  >
-    {/* {children} */}
-  </Text>
-);
