@@ -124,9 +124,9 @@ class CaughtMessage extends Sprite {
     this.scale.set(scale * 2);
 
     //TODO Make it scalable 
-    this.width = Settings.width/8;
-    this.height = Settings.height/6;
-    this.position.x = Settings.width/2;
+    this.width = Settings.width/6;
+    this.height = Settings.height/3;
+    this.position.x = Settings.width/2.5;
     this.position.y = Settings.skyHeight ;
 
   }
@@ -140,10 +140,10 @@ class Guard extends Sprite {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
-    this.width = Settings.width/8;
-    this.height = Settings.height/4;
+    this.width = Settings.width/5;
+    this.height = Settings.height/2.5;
 
-    this.position.x = Settings.width/2;
+    this.position.x = Settings.width/2.3;
     this.position.y = Settings.height; 
   }
 }
@@ -169,8 +169,8 @@ class Bird extends AnimatedSprite {
     super(textures);
     this.animationSpeed = 0.00;
     this.anchor.set(0.5);
-    this.width = Settings.width/20;
-    this.height = Settings.height/15;
+    this.width = Settings.width/15;
+    this.height = Settings.height/10;
 
     this.speedY = Settings.playerFallSpeed;
     this.rate = Settings.playerGravity;
@@ -320,7 +320,7 @@ class Game {
     //TODO Make 2500 global, this is time after which lose message will be displayed 
     setTimeout(() => {
       this.loseMessage();
-    }, 2000);
+    }, 3000);
 
   }; 
 
@@ -360,9 +360,16 @@ class Game {
     if (!this.ground2.groundDown) {
       this.ground2.position.y += Settings.gameSpeed;
       this.edge.position.y += Settings.gameSpeed;
-      if (this.ground2.position.y > Settings.height*0.7)
+      if (this.ground2.position.y > Settings.height*0.7){
         this.ground2.groundDown = true;
-        this.guard.position.y = Settings.height/2.5;
+        this.binocularState = true;
+        this.onScore(this.binocularState)
+        setTimeout(() => {
+          this.guard.position.y = Settings.height / 3.2;
+        }, 200);
+
+       
+      }
     }
     else if (this.ground2.position.x > Settings.skyHeight) {
       this.ground2.position.x += Settings.gameSpeed;
@@ -378,7 +385,7 @@ class Game {
   loseMessage() {
     if (!this.isButtonReleased) {
       //console.log("Lose Message!");
-      this.caughtMessage.position.y = Settings.height * 0.4;
+      this.caughtMessage.position.y = Settings.height * 0.3;
       this.userLost = true;
     }
     else { // Some debugging 
