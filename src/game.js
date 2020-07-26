@@ -1,16 +1,16 @@
-// Importing libraries 
+// Importing libraries
 import { PIXI } from 'expo-pixi';
 import {extras, Sprite } from 'pixi.js';
 import {PixelRatio } from 'react-native';
 
-// Importing backgrounds and assets 
+// Importing backgrounds and assets
 //import source2 from '../assets/ground2.png';
 import source3 from '../assets/guards/guards.png';
 import groundSouce from '../assets/ground/lvl1.png';
 import penguinSource from '../assets/penguin/penguin1.png';
 
 
-// Importing sprites 
+// Importing sprites
 import setupSpriteSheetAsync from './setupSpriteSheetAsync';
 import sprites from './sprites';
 import sprites2 from './Sprites/spriteSheet';
@@ -22,11 +22,11 @@ import penguinSprites from './Sprites/penguin';
 
 const {AnimatedSprite } = extras;
 
-// Getting scale to adjust size of the game to different screen sizes, Using PixelRatio library 
+// Getting scale to adjust size of the game to different screen sizes, Using PixelRatio library
 const scale = PixelRatio.get();
 
 //Level Settings
-let crnt_level = 1; 
+let crnt_level = 1;
 
 
 // Game settings Configurations
@@ -40,7 +40,7 @@ let Settings = {
   playerGravity: 0 * scale,
   minPipeHeight: 50 * scale,
   pipeVerticalGap: 190 * scale, //180 is pretty legit
-  gameSpeed: 15 * 0.25, // Game speed 
+  gameSpeed: 15 * 0.25, // Game speed
   guardWidth: 140 * scale,
   guardHeight: 140 * scale,
   secondCloudPositionY: 0,
@@ -56,24 +56,24 @@ class SteadySprite extends Sprite {
   }
 }
 
-// Ground object 
+// Ground object
 class Ground2 extends Sprite {
 
   buttonIsPressed = false;
-  groundDown = false; 
+  groundDown = false;
 
   constructor(texture) {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
     //console.log("SIZE:", Settings.width, Settings.height, scale);
-   
+
     this.height = Settings.height / 1.2;
     this.width = Settings.width / 1.00;
 
     Settings.groundPositionX = this.width*0.00;
     Settings.groundPositionY = (Settings.height - this.height)*1.05;
-    
+
     this.position.x = Settings.groundPositionX;
     this.position.y = Settings.groundPositionY;
 
@@ -81,7 +81,7 @@ class Ground2 extends Sprite {
 
 }
 
-// Object clouds on the side 
+// Object clouds on the side
 class SideClouds extends Sprite {
 
   constructor(texture) {
@@ -114,7 +114,7 @@ class Cloud extends Sprite {
 
 }
 
-// Message When user hold buttong for too long 
+// Message When user hold buttong for too long
 class CaughtMessage extends Sprite {
 
   backward = true;
@@ -125,7 +125,7 @@ class CaughtMessage extends Sprite {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
 
-    //TODO Make it scalable 
+    //TODO Make it scalable
     this.width = Settings.width/6;
     this.height = Settings.height/3;
     this.position.x = Settings.width/2.5;
@@ -135,22 +135,24 @@ class CaughtMessage extends Sprite {
 
 }
 
-// Guard Object 
+// Guard Object
 class Guard extends Sprite {
-  
+
   constructor(texture) {
     super(texture, Settings.width, Settings.groundHeight);
     this.scale.set(scale * 2);
+
 
     this.width = Settings.width/3.5;
     this.height = Settings.height/1.8;
 
     this.position.x = Settings.width/2.5;
-    this.position.y = Settings.height; 
+
+    this.position.y = Settings.height;
   }
 }
 
-// Background object 
+// Background object
 class Background extends Sprite {
   constructor(texture) {
     super(texture);
@@ -159,20 +161,22 @@ class Background extends Sprite {
     this.width = Settings.width;
     this.height = Settings.height;
   }
-  moveGround = false; 
+  moveGround = false;
 }
 
-// Poppi object 
+// Poppi object
 class Bird extends AnimatedSprite {
- 
-  moveBird = false; 
+
+  moveBird = false;
 
   constructor(textures) {
     super(textures);
     this.animationSpeed = 0.00;
     this.anchor.set(0.5);
+
     this.width = Settings.width/8;
     this.height = Settings.height/4.1;
+
 
     this.speedY = Settings.playerFallSpeed;
     this.rate = Settings.playerGravity;
@@ -180,7 +184,7 @@ class Bird extends AnimatedSprite {
     this.restart();
   }
 
-  // Restarts position 
+  // Restarts position
   restart = () => {
     this.play();
     this.rotation = 0;
@@ -190,20 +194,20 @@ class Bird extends AnimatedSprite {
 
 }
 
-let bird; 
+let bird;
 
 class Game {
-  
-  //States of the game 
+
+  //States of the game
   stopAnimating = true;
   isStarted = false;
   isDead = false;
   score = 0;
-  isButtonReleased = false; 
+  isButtonReleased = false;
   userLost = false;
-  
+
   this_guard;
-  this_background; 
+  this_background;
 
   constructor(context, background, guard) {
     // Sharp pixels
@@ -242,10 +246,10 @@ class Game {
 
   // Async loading textures and backgrounds
   loadAsync = async () => {
-    
+
     //Linking coordinates and background image
     this.textures = await setupSpriteSheetAsync(this.this_background, sprites);
-    
+
     //Linking coordinates and background image
     //this.textures2 = await setupSpriteSheetAsync(source2, sprites2);
 
@@ -253,13 +257,13 @@ class Game {
     this.guardTextute = await setupSpriteSheetAsync(source3, sprites3);
     this.groundTexture = await setupSpriteSheetAsync(groundSouce, groundSprites);
     this.penguinTexture = await setupSpriteSheetAsync(penguinSource, penguinSprites);
-    
+
     this.onAssetsLoaded();
   };
 
   onAssetsLoaded = () => {
 
-    // Creating background 
+    // Creating background
     this.background = new Background(this.textures.background);
 
     // Creating animated bird object
@@ -270,8 +274,8 @@ class Game {
       this.penguinTexture['penguin4'],
     ]);
 
-    //Making bird global 
-    this.bird = bird; 
+    //Making bird global
+    this.bird = bird;
 
 
     //Making Ground object
@@ -282,17 +286,17 @@ class Game {
     //Creating Caught message
     this.caughtMessage = new CaughtMessage(this.guardTextute.message)
 
-    //TODO here i should create a new algorithm to get elements from the questions bank 
-    let randomGuard = Math.floor(Math.random() * 10) +1;  // returns a random integer from 0 to 10; 
+    //TODO here i should create a new algorithm to get elements from the questions bank
+    let randomGuard = Math.floor(Math.random() * 10) +1;  // returns a random integer from 0 to 10;
 
     //console.log(this.guardTextute[]);
 
     this.guard = new Guard(this.guardTextute.guard10);
 
     this.guard = new Guard(this.guardTextute[this.this_guard]);
- 
- 
-    // Adding objects to the screen 
+
+
+    // Adding objects to the screen
     [this.background, this.guard, this.caughtMessage, this.ground2 , this.bird].map(child =>
       this.app.stage.addChild(child),
     );
@@ -302,10 +306,10 @@ class Game {
   };
 
 
-  // This functions starts when the button is clicked 
+  // This functions starts when the button is clicked
   onPress = () => {
 
-    this.guard.buttonIsPressed = true; 
+    this.guard.buttonIsPressed = true;
     this.guard.backward = true;
 
     this.bird.animationSpeed = 0.053;
@@ -318,21 +322,19 @@ class Game {
 
 
       this.beginGame();
-    
-   
 
-  }; 
+  };
 
 
-  //Function which will run once user releases the button 
+  //Function which will run once user releases the button
   onPressOut = () =>{
     this.ground2.moveGround = false;
     this.moveBack();
     this.bird.animationSpeed = 0;
-    
+
   }
 
-  
+
   beginGame = () => {
     if (!this.isStarted) {
       this.isStarted = true;
@@ -341,17 +343,17 @@ class Game {
   };
 
   animate = () => {
-    // if game ends 
+    // if game ends
     if (this.stopAnimating) {
       return;
     }
 
-    // If game is started and button was pressed 
+    // If game is started and button was pressed
     if (this.isStarted && this.ground2.moveGround ){
       setTimeout(() => {
         this.moveToTheEdge();
       }, 300);
-     
+
     }
 
   };
@@ -361,13 +363,14 @@ class Game {
     if (!this.ground2.groundDown) {
       this.ground2.position.y += Settings.gameSpeed;
       this.edge.position.y += Settings.gameSpeed;
-      
+
+
       // Variable to control how much down to move edge of the castle
       let edgeDownLevel = Settings.height * 0.5;
 
       // Variable to control how high to move guards of the castle
       let guardsUpLevel = Settings.height / 5.5;
- 
+
       // when poppi reaches the eadge
       if (this.ground2.position.y > edgeDownLevel ){
         this.ground2.groundDown = true;
@@ -376,25 +379,26 @@ class Game {
         // this.bird.position.y = Settings.height / 1.14;
         setTimeout(() => {
 
-          //Moving guards to top making them visible 
+          //Moving guards to top making them visible
           this.guard.position.y = guardsUpLevel;
-          
-          // Stopping bird moving 
+
+          // Stopping bird moving
           this.bird.animationSpeed = 0.00;
 
 
           //Poppi's head pops up in the binocular view, so I am moving it a little bit down
-          
+
 
           // Making edge invisible
           this.ground2.position.y = Settings.skyHeight;
 
         }, 200);
-       
-        //TODO Make 2500 global, this is time after which lose message will be displayed 
+
+        //TODO Make 2500 global, this is time after which lose message will be displayed
         setTimeout(() => {
           this.loseMessage();
-        }, Settings.caughtMessageTime); 
+        }, Settings.caughtMessageTime);
+
 
       }
     }
@@ -408,14 +412,14 @@ class Game {
 
   };
 
-  //This function will dislpay a lose message, if user holds button for too long 
+  //This function will dislpay a lose message, if user holds button for too long
   loseMessage() {
     if (!this.isButtonReleased) {
       //console.log("Lose Message!");
       this.caughtMessage.position.y = Settings.height * 0.3;
       this.userLost = true;
     }
-    else { // Some debugging 
+    else { // Some debugging
       this.ground2.position.y = Settings.groundPositionY;
     }
   }

@@ -19,10 +19,10 @@ const Binocular = ({ backToMainMenu, onMenuToggle }) => {
         ).start();
     }, [fadeAnim])
 
-    
+
     return (
 
-        
+
         <TouchableOpacity
             activeOpacity={1}
             onPress={onMenuToggle}
@@ -35,7 +35,9 @@ const Binocular = ({ backToMainMenu, onMenuToggle }) => {
                 justifyContent: "center",
                 alignItems: "center",
                 opacity: fadeAnim,
+
             }} source={require('../../assets/binoculus2.png')} ></Animated.Image>
+
             {/* <View style={styles.root}>
                 <Button
                     color={colors.redLight}
@@ -48,10 +50,10 @@ const Binocular = ({ backToMainMenu, onMenuToggle }) => {
                     BACK TO GAME
         </Button>
             </View> */}
-            
+
               {/* </FadeInView> */}
         </TouchableOpacity>
-      
+
     );
 };
 
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: "center",
         alignItems: "center",
-        
+
          // active card will have a zIndex of `e.timeStamp`- so this needs to be larger
     },
     // Hacky way to have an opaque background without using rgba

@@ -1,14 +1,16 @@
 import { GLView } from 'expo';
 
+
 import * as React from 'react';
 
 
 import {Image, Text, View, TouchableOpacity, ImageBackground } from 'react-native';
 
+
 //import Modal from 'modal-react-native-web';
 import Modal from 'modal-enhanced-react-native-web';
 
-//importing styles 
+//importing styles
 import styles from "./src/styles";
 
 import {Card} from 'react-native-elements';
@@ -36,7 +38,7 @@ import { timingSafeEqual } from 'crypto';
 require('default-passive-events');
 
 export default class App extends React.Component {
-  
+
 
 
   level1_backgrounds = ['background/lvl1.png', 'background/lvl1.png',
@@ -46,12 +48,12 @@ export default class App extends React.Component {
     'background/lvl1.png', 'background/lvl1.png'];
 
   level1_Settings = {
-    level: 1, //level 
+    level: 1, //level
     max: 3, // maximum number of guards
     green: 10, // number of green guards in this level
     yellow: 0, // number of yellow guards in this level
     red: 0, // number of red guards in this level
-    max_repetition: 4, // max number of one type of the guard repeats 
+    max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
     background: this.level1_backgrounds,
   };
@@ -62,28 +64,28 @@ export default class App extends React.Component {
     'background/3.png', 'background/3.png',
     'background/3.png', 'background/3.png',
     'background/3.png', 'background/3.png'];
-  
+
   level2_Settings = {
-    level: 2, //level 
+    level: 2, //level
     max: 3, // maximum number of guards
     green: 6, // number of green guards in this level
     yellow: 4, // number of yellow guards in this level
     red: 0, // number of red guards in this level
-    max_repetition: 4, // max number of one type of the guard repeats 
+    max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
     background: this.level2_backgrounds,
 
   };
 
   level3_Settings = {
-    level: 3, //level 
+    level: 3, //level
     max: 4, // maximum number of guards
     green: 5, // number of green guards in this level
     yellow: 3, // number of yellow guards in this level
     red: 2, // number of red guards in this level
-    max_repetition: 4, // max number of one type of the guard repeats 
+    max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 1
-  }; 
+  };
 
   state = {
     level_state: 'menu',
@@ -93,16 +95,16 @@ export default class App extends React.Component {
     visibleCaught: false,
     result: false,
     level_1: true,
-    walking: true, 
+    walking: true,
     win: false,
     lastRefresh: Date(Date.now()).toString(),
     isListEmpty: false,
     currentLevel: this.level1_Settings,
-    highestLevel: 1, 
-    isMainMenuVisible: true, 
-    isLevelsMenuVisible: false, 
+    highestLevel: 1,
+    isMainMenuVisible: true,
+    isLevelsMenuVisible: false,
     isInGameMenuVisible: false,
-    isBinocularVisible: false, 
+    isBinocularVisible: false,
   };
 
   onMenuToggle = () => {
@@ -114,18 +116,18 @@ export default class App extends React.Component {
 
   refreshScreen() {
     this.refreshScreen.bind(this)
-  } 
+  }
 
   guardsList = [];
-  backgroundList=[]; 
+  backgroundList=[];
   numberOfCards = 58;
 
   game = null;
 
 
-  currentGuard; 
-  
-  
+  currentGuard;
+
+
 
      levels = {
       1: this.level1_Settings,
@@ -147,7 +149,7 @@ export default class App extends React.Component {
 
     } catch (error) {
       // Error saving data
-    } 
+    }
   }
 
 
@@ -157,7 +159,7 @@ export default class App extends React.Component {
       const current_level = await AsyncStorage.getItem('current_level');
       const highest_level = await AsyncStorage.getItem('highest_level');
       if (current_level !== null && highest_level !== null) {
-        
+
         // Our data is fetched successfully
         //this.setState({ highestLevel: highest_level });
         this.setState({ currentLevel: current_level })
@@ -170,12 +172,12 @@ export default class App extends React.Component {
     }
   }
 
-   
+
   createGuardList(level){
-   
+
     this.guardsList = []
     this.backgroundList = [];
-    let random;  // returns a random integer from 0 to 10; 
+    let random;  // returns a random integer from 0 to 10;
 
 
     let green = level.green;
@@ -217,15 +219,15 @@ export default class App extends React.Component {
       }
 
     }
- 
+
     //console.log(level)
     //console.log(level.background)
     this.backgroundList = Object.assign([],level.background);
 
 
 
-    this.setState({ level_state: 'levelOne' }); 
-    
+    this.setState({ level_state: 'levelOne' });
+
   }
 
   _renderButton = (text, onPress) => (
@@ -238,48 +240,48 @@ export default class App extends React.Component {
 
   _renderModalContent = () => (
     <View isLost={false} style={styles.modalContent}>
-      
+
 
       {
         // Display the content in screen when state object "content" is true.
-        // Hide the content in screen when state object "content" is false. 
-        !this.state.result && !this.state.win ? 
+        // Hide the content in screen when state object "content" is false.
+        !this.state.result && !this.state.win ?
         <View>
           <Text style={styles.headerText}>How many Guards did you see?</Text>
-          <Text style={styles.headerText}> 
+          <Text style={styles.headerText}>
             {this._renderButton("1", () => { this.checkForResult(1) })}
             {this._renderButton("2", () => { this.checkForResult(2) })}
             {this._renderButton("3", () => { this.checkForResult(3) })}
             {this._renderButton("4", () => { this.checkForResult(4)})}
             {this._renderButton("5", () => this.checkForResult(5))}
 
-          </Text> 
+          </Text>
         </View>: null
       }
 
       {
         // Display the content in screen when state object "content" is true.
-        // Hide the content in screen when state object "content" is false. 
-        this.state.result && !this.state.isListEmpty ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!  
-        
+        // Hide the content in screen when state object "content" is false.
+        this.state.result && !this.state.isListEmpty ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!
+
         {this._renderButton("Next Stage", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'walking' });})}
 
-        </Text> : null 
+        </Text> : null
 
-        
-           
+
+
         }
 
       {
         // Display the content in screen when state object "content" is true.
-        // Hide the content in screen when state object "content" is false. 
+        // Hide the content in screen when state object "content" is false.
         this.state.win ? <Text style={styles.headerText}> {"\n"}Congratulations, you won!
 
         {
-          this._renderButton("Next Level", () => { 
-            this.setState({ level_1: false }); 
-            this.setState({ visibleModal: false }); 
-            this.setState({ level_state: 'create_list' }); 
+          this._renderButton("Next Level", () => {
+            this.setState({ level_1: false });
+            this.setState({ visibleModal: false });
+            this.setState({ level_state: 'create_list' });
             this.setState({ currentLevel: this.levels[(this.state.currentLevel.level + 1)], win: false, isListEmpty:false });})}
 
         </Text> : null
@@ -319,7 +321,7 @@ export default class App extends React.Component {
     }
 
  }
-  
+
   _renderModalLost = () => (
     <View style={styles.modalContent}>
       <Text>That’s not right! Please Try Again! </Text>
@@ -362,11 +364,11 @@ export default class App extends React.Component {
 
 
   levelSelectionMenu = () => {
-    
+
         this.setState({
           isLevelsMenuVisible: !this.state.isLevelsMenuVisible,
         });
-      
+
 
     // this._storeData();
     // this._retrieveData();
@@ -374,11 +376,11 @@ export default class App extends React.Component {
 
 
   stopWalking = () =>{
-    this.setState({ walking: false }); 
+    this.setState({ walking: false });
     this.setState({ level_state: 'levelOne' })
     this.setState({ result: false });
   }
-  
+
 
 
   backToMainMenu = () => {
@@ -405,7 +407,6 @@ export default class App extends React.Component {
      }));
     }
 
-   
 
    _start = () => {
     Animated.timing(this.fadeAnim.fadeValue, {
@@ -413,29 +414,30 @@ export default class App extends React.Component {
       duration: 1000
     }).start();
   };
-  
 
 
   render() {
     const { style, ...props } = this.props;
 
-  
+
     // const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
 
 
-   
 
-   
+
+
 
 
     const levelOne = (
 
-    
+
+
       <View
+
         style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}
       >
 
-       
+
         <Modal
           isVisible={this.state.visibleModal}
         // onBackdropPress={() => this.setState({ visibleModal: false })}
@@ -470,7 +472,7 @@ export default class App extends React.Component {
             position: 'absolute',
             top: 15,
             left: 15,
-       
+
           }}>
             <Card title={"Level " + this.state.currentLevel.level}>
               <Text style={styles.paragraph}>
@@ -491,7 +493,7 @@ export default class App extends React.Component {
             style={{ flex: 1, backgroundColor: 'black' }}
             onContextCreate={context => {
               if (this.guardsList.length > 1){
-                
+
                 this.currentGuard = this.guardsList.pop();
                 let path = this.backgroundList.pop();
                 let bg = require('./assets/' + path);
@@ -516,13 +518,13 @@ export default class App extends React.Component {
             }}
           >
 
-          </GLView>  
+          </GLView>
 
-          
+
 
 
         </DisableBodyScrollingView>
-       
+
         {this.state.isInGameMenuVisible && (
           <Menu
             backToMainMenu = {this.backToMainMenu}
@@ -532,20 +534,20 @@ export default class App extends React.Component {
         )}
 
         {this.state.isBinocularVisible && (<Binocular
-          
+
         />)}
 
         <CircleButton
           onPress={this.onMenuToggle}
           style={{
-       
+
             position: "absolute",
             top: 25,
             right: 25,
           }}>
           Menu
           </CircleButton>
-        
+
 
         <View
           style={{
@@ -554,9 +556,9 @@ export default class App extends React.Component {
             bottom: 50,
             left: 100,
           }}
-         
+
           >
-          
+
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
             <Image
               style={{ width: 100, userSelect: 'none', height: 100 }}
@@ -578,14 +580,14 @@ export default class App extends React.Component {
           onLongPress={() => {
             this.game.onPress(); console.log("it's been pressed"); }}
           onPressOut={() => { this.displayQuestions(); this.toggleBinocular()  }}
-          
+
           >
           <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
-        
+
           </View>
         </TouchableOpacity>
 
-        
+
 
 
       </View>
@@ -598,18 +600,17 @@ export default class App extends React.Component {
 
 
 
-
     return (
-    
+
       <div>
 
         {this.state.level_state == 'menu' && !this.state.isLevelsMenuVisible && (
             <MainMenu
               startGame={this.startGame}
               levelSelectionMenu = {this.levelSelectionMenu}
-              
+
             />
-            
+
         ) }
 
           {this.state.isLevelsMenuVisible && (
@@ -624,10 +625,10 @@ export default class App extends React.Component {
         <WalkingComponent
           stopWalking={this.stopWalking}>
         </WalkingComponent>)}
-        {this.state.level_state == 'levelOne' && levelOne} 
+        {this.state.level_state == 'levelOne' && levelOne}
       </div>
 
-      
+
     );
 
   }
