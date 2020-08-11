@@ -13,19 +13,27 @@ import { extras, Sprite } from 'pixi.js';
 import { PixelRatio } from 'react-native';
 
 import source from '../../assets/background/walking2.png';
-import penguinSource from '../../assets/penguin/penguin1.png';
+import penguinSource from '../../assets/penguin/penguin_walking.png';
 
 import setupSpriteSheetAsync from '../setupSpriteSheetAsync';
 import sprites from '../sprites';
 import penguinSprites from '../Sprites/penguin';
 import CircleButton from "../../assets/CircleButton";
 
+import AnimatedSplash from "react-native-animated-splash-screen";
 
 let game;
 
 
-
 const WalkingComponent = ({ stopWalking }) => {
+
+    let doSomething = () => {
+        game.bird.animationSpeed = 0; 
+        game.stopAnimating = true; 
+        game = null; 
+        stopWalking();
+
+    }
 
     const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
 
@@ -39,18 +47,13 @@ const WalkingComponent = ({ stopWalking }) => {
             }
         ).start();
     }, [fadeAnim])
+    
 
-
-
-    let doSomething = () => {
-        stopWalking()
-
-    }
 
     return (
-        <View>
+                
         <Animated.View
-            style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}
+            style={[{ width: '100vw', height: '100vh', overflow: 'hidden', opacity: fadeAnim }]}
         >
 
             <DisableBodyScrollingView >
@@ -67,20 +70,6 @@ const WalkingComponent = ({ stopWalking }) => {
 
             </DisableBodyScrollingView>
 
-            {/* <TouchableOpacity
-                style={{
-                    userSelect: 'none',
-                    position: 'absolute',
-                    bottom: 50,
-                    left: 100,
-                }}
-                onPress={() => { doSomething }}
-                >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Button></Button>
-                </View>
-            </TouchableOpacity> */}
-
             <CircleButton style={{
                 userSelect: 'none',
                 position: 'absolute',
@@ -94,15 +83,14 @@ const WalkingComponent = ({ stopWalking }) => {
 
 
         </Animated.View>
-        </View>
+
     );
-
-    
-};
+   }
 
 
 
-const styles = StyleSheet.create({
+
+ const styles = StyleSheet.create({
     root: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: "center",
@@ -119,6 +107,8 @@ const styles = StyleSheet.create({
         margin: 8,
     },
 });
+
+
 
 export default WalkingComponent;
 
@@ -139,7 +129,8 @@ let Settings = {
     playerGravity: 0 * scale,
     minPipeHeight: 50 * scale,
     pipeVerticalGap: 190 * scale, //180 is pretty legit
-    gameSpeed: 35 * 0.25,
+    gameSpeed: 40 * 0.25,
+    animationSpeed: 0.06,
     guardWidth: 200 * scale,
     guardHeight: 200 * scale
 };
@@ -169,12 +160,14 @@ class Bird extends AnimatedSprite {
 
     moveBird = false;
 
+     
+
     constructor(textures) {
         super(textures);
         this.animationSpeed = 0.00;
         this.anchor.set(0.5);
-        this.width = Settings.width / 8;
-        this.height = Settings.height / 4;
+        this.width = Settings.width / 6;
+        this.height = Settings.height / 3;
 
         this.speedY = Settings.playerFallSpeed;
         this.rate = Settings.playerGravity;
@@ -240,10 +233,11 @@ class Game {
         this.background = new Background(this.textures.background);
 
         bird = new Bird([
-            this.penguinTexture['penguin1'],
-            this.penguinTexture['penguin2'],
-            this.penguinTexture['penguin3'],
-            this.penguinTexture['penguin4'],
+            this.penguinTexture['penguin_w1'],
+            this.penguinTexture['penguin_w2'],
+
+            this.penguinTexture['penguin_w3'],
+            this.penguinTexture['penguin_w4'],
         ]);
 
         this.bird = bird;
@@ -271,7 +265,7 @@ class Game {
 
         if (this.bird.position.x < Settings.width * 0.8) {
             this.bird.position.x += Settings.gameSpeed;
-            this.bird.animationSpeed = 0.1;
+            this.bird.animationSpeed = Settings.animationSpeed;
 
         }
         else {

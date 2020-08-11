@@ -1,52 +1,45 @@
 import { GLView } from 'expo';
-
-
 import * as React from 'react';
-
-
-import {Image, Text, View, TouchableOpacity, ImageBackground } from 'react-native';
-
-
-//import Modal from 'modal-react-native-web';
+import {Animated, Image, Text, View, TouchableOpacity } from 'react-native';
 import Modal from 'modal-enhanced-react-native-web';
-
-//importing styles
-import styles from "./src/styles";
-
+import styles from "./src/styles"; //importing styles
 import {Card} from 'react-native-elements';
-
 import CircleButton from './assets/CircleButton';
-
 import WalkingComponent from './src/walking/walking_component'
-
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
 import Game from './src/game';
-
 import { AsyncStorage } from "react-native";
-
-import WalkingObject from './src/walking';
 import sprites3 from './src/Sprites/guardSheet';
-
 import MainMenu from "./src/Menu/mainmenu";
 import Menu from "./src/Menu/inGameMenu";
 import Binocular from "./src/Binocular/binocular"
-
 import LevelSelection from "./src/Menu/LevelSelection";
-import { set } from 'gl-matrix/src/gl-matrix/vec2';
-import { timingSafeEqual } from 'crypto';
+import Loading from "./src/Loading/loading"
 
-require('default-passive-events');
+
+import AnimatedSplash from "react-native-animated-splash-screen";
+
 
 export default class App extends React.Component {
 
 
+  // Global Variables 
 
+  guardsList = [];
+  backgroundList = [];
+  numberOfCards = 58;
+  game = null;
+  currentGuard;
+
+
+  // Backgrounds for Level 1 Stages 
   level1_backgrounds = ['background/lvl1.png', 'background/lvl1.png',
     'background/lvl1.png', 'background/lvl1.png',
     'background/lvl1.png', 'background/lvl1.png',
     'background/lvl1.png', 'background/lvl1.png',
     'background/lvl1.png', 'background/lvl1.png'];
 
+  // Level 1 Settings input 
   level1_Settings = {
     level: 1, //level
     max: 3, // maximum number of guards
@@ -58,13 +51,14 @@ export default class App extends React.Component {
     background: this.level1_backgrounds,
   };
 
+  // Backgrounds for Level 2 Stages 
+  level2_backgrounds = ['background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png',
+    'background/lvl1.png', 'background/lvl1.png'];
 
-  level2_backgrounds = ['background/3.png', 'background/3.png',
-    'background/3.png', 'background/3.png',
-    'background/3.png', 'background/3.png',
-    'background/3.png', 'background/3.png',
-    'background/3.png', 'background/3.png'];
-
+  // Level 1 Settings input 
   level2_Settings = {
     level: 2, //level
     max: 3, // maximum number of guards
@@ -74,7 +68,6 @@ export default class App extends React.Component {
     max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
     background: this.level2_backgrounds,
-
   };
 
   level3_Settings = {
@@ -88,54 +81,45 @@ export default class App extends React.Component {
   };
 
   state = {
-    level_state: 'menu',
-    sleepingPills: 0,
-    modalVisible: false,
-    visibleLost: false,
-    visibleCaught: false,
-    result: false,
+    level_state: 'menu', // Current state of the app: menu = Main Menu 
+    sleepingPills: 0, // Number of sleeping pills 
+    modalVisible: false, // Dialog view visability 
+    visibleLost: false, // Lost Dialog view visability 
+    visibleCaught: false, // Caught Dialog view visability 
+    result: false, 
     level_1: true,
     walking: true,
     win: false,
-    lastRefresh: Date(Date.now()).toString(),
-    isListEmpty: false,
-    currentLevel: this.level1_Settings,
-    highestLevel: 1,
+    lastRefresh: Date(Date.now()).toString(), 
+    isListEmpty: false, // It tracks the end of the level 
+    currentLevel: this.level1_Settings, // Current level 
+    highestLevel: 1, 
     isMainMenuVisible: true,
     isLevelsMenuVisible: false,
     isInGameMenuVisible: false,
     isBinocularVisible: false,
-  };
+    isLoadingVisible: false, 
+    isLoaded: false,
+    };
 
+  // Funtion to Toggle In Game menu 
   onMenuToggle = () => {
+    console.log("it's working ")
     this.setState((state) => ({
       isInGameMenuVisible: !this.state.isInGameMenuVisible,
     }));
   };
 
+  
 
-  refreshScreen() {
-    this.refreshScreen.bind(this)
+  // List of available levels' settings.
+  levels = { //TODO only 3 levels are available rn, add more levels 
+    1: this.level1_Settings,
+    2: this.level2_Settings,
+    3: this.level3_Settings,
   }
 
-  guardsList = [];
-  backgroundList=[];
-  numberOfCards = 58;
-
-  game = null;
-
-
-  currentGuard;
-
-
-
-     levels = {
-      1: this.level1_Settings,
-      2: this.level2_Settings,
-      3: this.level3_Settings,
-    }
-
-  // a function that saves your data asyncronously
+  // a function that saves data asyncronously
   _storeData = async () => {
     try {
       await AsyncStorage.setItem('current_level', JSON.stringify(this.state.currentLevel)).then(() => {
@@ -151,7 +135,6 @@ export default class App extends React.Component {
       // Error saving data
     }
   }
-
 
   // fetch the data back asyncronously
   _retrieveData = async () => {
@@ -173,6 +156,7 @@ export default class App extends React.Component {
   }
 
 
+  // Functions that creates guardList for the given level 
   createGuardList(level){
 
     this.guardsList = []
@@ -190,6 +174,7 @@ export default class App extends React.Component {
       dic[i] = 0;
 
     let temp;
+
     while (this.guardsList.length < 10) {
       random = Math.floor(Math.random() * this.numberOfCards);
 
@@ -217,19 +202,13 @@ export default class App extends React.Component {
           }
         }
       }
-
     }
-
-    //console.log(level)
-    //console.log(level.background)
     this.backgroundList = Object.assign([],level.background);
 
-
-
     this.setState({ level_state: 'levelOne' });
-
   }
 
+  //Function that creates buttons for dialog view. 
   _renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.button}>
@@ -238,9 +217,9 @@ export default class App extends React.Component {
     </TouchableOpacity>
   );
 
+  //Function that creates Content for buttons 
   _renderModalContent = () => (
     <View isLost={false} style={styles.modalContent}>
-
 
       {
         // Display the content in screen when state object "content" is true.
@@ -268,8 +247,6 @@ export default class App extends React.Component {
 
         </Text> : null
 
-
-
         }
 
       {
@@ -294,15 +271,10 @@ export default class App extends React.Component {
 
   onPressLevelSelection = (selectedLevel) => {
 
-    //console.log("Hello" + selectedLevel)
     this.setState({
       currentLevel: this.levels[selectedLevel],
       level_state: 'create_list',
     });
-
-
-    //console.log(this.state.currentLevel)
-    //console.log(this.levels[selectedLevel])
 
   }
 
@@ -326,9 +298,11 @@ export default class App extends React.Component {
     <View style={styles.modalContent}>
       <Text>That’s not right! Please Try Again! </Text>
       {this._renderButton("Try Again!", () => {
-        this.setState({ level_state: 'create_list' }); this.setState({ visibleLost: false});})}
+        this.setState({ level_state: 'create_list' }); this.setState({ visibleLost: false });
+      })}
     </View>
   );
+
 
   _renderModalCaught= () => (
     <View style={styles.modalContent}>
@@ -339,17 +313,6 @@ export default class App extends React.Component {
     </View>
   );
 
-  _handleOnScroll = event => {
-    this.setState({
-      scrollOffset: event.nativeEvent.contentOffset.y
-    });
-  };
-
-  _handleScrollTo = p => {
-    if (this.scrollViewRef) {
-      this.scrollViewRef.scrollTo(p);
-    }
-  };
 
   displayQuestions = () =>{
 
@@ -369,19 +332,15 @@ export default class App extends React.Component {
           isLevelsMenuVisible: !this.state.isLevelsMenuVisible,
         });
 
-
     // this._storeData();
     // this._retrieveData();
   };
 
-
   stopWalking = () =>{
-    this.setState({ walking: false });
+    this.setState({ walking: false, isLoadingVisible: true });
     this.setState({ level_state: 'levelOne' })
     this.setState({ result: false });
   }
-
-
 
   backToMainMenu = () => {
     this.setState({
@@ -394,76 +353,51 @@ export default class App extends React.Component {
   startGame = () => {
     this.setState({
       isMainMenuVisible: false,
+      isLoadingVisible: true, 
       level_state: 'create_list',
     });
 
-    //console.log(this.state.level_state)
-    //console.log("start game")
   };
+  
 
    toggleBinocular = () => {
+     console.log("it's working")
      this.setState((state) => ({
        isBinocularVisible: !this.state.isBinocularVisible,
      }));
     }
 
 
-   _start = () => {
-    Animated.timing(this.fadeAnim.fadeValue, {
-      toValue: 1,
-      duration: 1000
-    }).start();
-  };
+  toggleLoadingPage = (state) => {
+    console.log("it's working")
+    this.setState((state) => ({
+      isLoadingVisible: false,
+    }));
+  }
+
+  selectedLevel = 0;
+
+  //fadeAnim = React.useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
+
+  animate() {
+    React.useEffect(() => {
+      Animated.timing(
+        fadeAnim,
+        {
+          toValue: 1,
+          duration: 1000,
+        }
+      ).start();
+    }, [fadeAnim])
+  }
 
 
-  render() {
-    const { style, ...props } = this.props;
+  levelOne = (
 
-
-    // const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
-
-
-
-
-
-
-
-    const levelOne = (
-
-
-
-      <View
-
-        style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}
-      >
-
-
-        <Modal
-          isVisible={this.state.visibleModal}
-        // onBackdropPress={() => this.setState({ visibleModal: false })}
-        >
-
-          {this._renderModalContent()}
-
-        </Modal>
-
-        <Modal
-          isVisible={this.state.visibleLost}
-        //onBackdropPress={() => this.setState({ visibleLost: false })}
-        >
-
-          {this._renderModalLost()}
-
-        </Modal>
-        <Modal
-          isVisible={this.state.visibleCaught}
-        //onBackdropPress={() => this.setState({ visibleLost: false })}
-        >
-
-          {this._renderModalCaught()}
-
-        </Modal>
-
+   
+    <View>  
+          
+      <View style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}>
 
         <DisableBodyScrollingView >
 
@@ -471,16 +405,15 @@ export default class App extends React.Component {
             userSelect: 'none',
             position: 'absolute',
             top: 15,
-            left: 15,
+            left: 15, }}>
 
-          }}>
             <Card title={"Level " + this.state.currentLevel.level}>
               <Text style={styles.paragraph}>
-                Stage {10 - this.guardsList.length+1}/10
-          </Text>
+                Stage {10 - this.guardsList.length + 1}/10
+            </Text>
 
               <Text>5 X
-            <Image
+              <Image
                   style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
                   source={require('./assets/sleepingSpell.png')}
                   resizeMode="contain"
@@ -492,18 +425,19 @@ export default class App extends React.Component {
           <GLView
             style={{ flex: 1, backgroundColor: 'black' }}
             onContextCreate={context => {
-              if (this.guardsList.length > 1){
+              if (this.guardsList.length > 1) {
 
                 this.currentGuard = this.guardsList.pop();
                 let path = this.backgroundList.pop();
                 let bg = require('./assets/' + path);
 
-                this.game = new Game(context, bg, this.currentGuard.name);
+                this.game = new Game(context, this.currentGuard.name);
 
-                //console.log(this.currentGuard);
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
+                this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
+
               }
-              else{
+              else {
                 this.setState({ isListEmpty: true })
                 this.currentGuard = this.guardsList.pop();
                 let path = this.backgroundList.pop();
@@ -511,107 +445,108 @@ export default class App extends React.Component {
 
                 this.game = new Game(context, bg, this.currentGuard.name);
 
-                //console.log(this.currentGuard);
                 this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
               }
 
             }}
           >
-
           </GLView>
-
-
-
 
         </DisableBodyScrollingView>
 
-        {this.state.isInGameMenuVisible && (
-          <Menu
-            backToMainMenu = {this.backToMainMenu}
-            onMenuToggle = {this.onMenuToggle}
-          />
-
-        )}
-
-        {this.state.isBinocularVisible && (<Binocular
-
-        />)}
-
-        <CircleButton
-          onPress={this.onMenuToggle}
-          style={{
-
-            position: "absolute",
-            top: 25,
-            right: 25,
-          }}>
-          Menu
-          </CircleButton>
-
-
-        <View
-          style={{
-            userSelect: 'none',
-            position: 'absolute',
-            bottom: 50,
-            left: 100,
-          }}
-
-          >
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
-            <Image
-              style={{ width: 100, userSelect: 'none', height: 100 }}
-              source={require('./assets/binoculars6.png')}
-              resizeMode="contain"
-            />
-
-            {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={{
-            userSelect: 'none',
-            position: 'absolute',
-            bottom: 50,
-            left: 100,
-          }}
-          onLongPress={() => {
-            this.game.onPress(); console.log("it's been pressed"); }}
-          onPressOut={() => { this.displayQuestions(); this.toggleBinocular()  }}
-
-          >
-          <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
-
-          </View>
-        </TouchableOpacity>
-
-
-
-
       </View>
 
-    );
+
+      {/* ======================================================================================= */}
 
 
-    let selectedLevel = 0;
+      <View
+        style={{
+          userSelect: 'none',
+          position: 'absolute',
+          bottom: 50,
+          left: 100, }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
+          <Image
+            style={{ width: 100, userSelect: 'none', height: 100 }}
+            source={require('./assets/binoculars6.png')}
+            resizeMode="contain"/>
+          {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
+        </View>
+      </View>
 
+      <TouchableOpacity
+        style={{
+          userSelect: 'none',
+          position: 'absolute',
+          bottom: 50,
+          left: 100,
+        }}
+        onLongPress={() => {
+          this.game.onPress(); console.log("it's been pressed");
+        }}
+        onPressOut={() => { this.displayQuestions(); this.toggleBinocular() }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
+        </View>
+      </TouchableOpacity>
 
+      <CircleButton
+        onPress={this.onMenuToggle}
+        style={{
+          position: "absolute",
+          top: 25,
+          right: 25,
+        }}>
+        Menu
+      </CircleButton>
+     
+  </View>
+);
 
+  lazyWithPreload(factory) {
+    const Component = React.lazy(factory);
+    Component.preload = factory;
+    console.log("preloading");
+    return Component;
+  }
+
+  StockChart = this.lazyWithPreload(() => this.levelOne);
+
+  render() {
 
     return (
 
       <div>
 
+       
+
+        {this.state.isInGameMenuVisible && (
+          <Menu
+            style={{ zIndex: 100 }}
+            backToMainMenu={this.backToMainMenu}
+            onMenuToggle={this.onMenuToggle}
+          />)}
+
+        <Modal isVisible={this.state.visibleModal}
+        // onBackdropPress={() => this.setState({ visibleModal: false })}
+        >
+          {this._renderModalContent()}
+        </Modal>
+
+        <Modal isVisible={this.state.visibleLost}>
+          {this._renderModalLost()}
+        </Modal>
+
+        <Modal isVisible={this.state.visibleCaught}>
+          {this._renderModalCaught()}
+        </Modal>
+
         {this.state.level_state == 'menu' && !this.state.isLevelsMenuVisible && (
             <MainMenu
               startGame={this.startGame}
               levelSelectionMenu = {this.levelSelectionMenu}
-
-            />
-
-        ) }
+            />) 
+        }
 
           {this.state.isLevelsMenuVisible && (
             <LevelSelection
@@ -622,13 +557,34 @@ export default class App extends React.Component {
           )}
         {this.state.level_state == 'create_list' && this.createGuardList(this.state.currentLevel) }
         {this.state.level_state == 'walking' && (
-        <WalkingComponent
-          stopWalking={this.stopWalking}>
-        </WalkingComponent>)}
-        {this.state.level_state == 'levelOne' && levelOne}
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <WalkingComponent
+              stopWalking={this.stopWalking}>
+            </WalkingComponent>
+          </React.Suspense>
+        )}
+        {this.state.level_state == 'levelOne' && 
+        
+          // <AnimatedSplash
+          //   translucent={true}
+          //   isLoaded={this.state.isLoaded}
+          //   logoImage={require("./assets/icons/loading-icon.png")}
+          //   backgroundColor={"#262626"}
+          //   logoHeight={150}
+          //   logoWidth={150}
+          // >            
+            this.StockChart.preload()
+            
+          // </AnimatedSplash>
+        }
+        {this.state.isBinocularVisible && (<Binocular
+
+        />)}
+
+        {this.state.isLoadingVisible && (<Loading
+
+        />)}
       </div>
-
-
     );
 
   }

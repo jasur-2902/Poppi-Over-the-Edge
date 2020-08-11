@@ -1,7 +1,6 @@
 import React, { useRef, useEffect  } from "react";
 import { Animated, StyleSheet, TouchableOpacity, View, Image} from "react-native";
 
-import FadeInView from "./animation"
 import colors from "../../assets/constants/colors";
 import Button from "../../assets/Button";
 

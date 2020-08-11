@@ -21,8 +21,10 @@
     "react": "^16.13.1",
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
+    "react-native-animated-splash-screen": "^2.0.5",
     "react-native-countdown-component": "^2.7.1",
     "react-native-elements": "^2.0.3",
+    "react-native-magic-move": "^0.6.6",
     "react-native-super-grid": "^4.0.2",
     "react-native-viewport-units": "^0.0.5",
     "react-native-web": "^0.11.7"

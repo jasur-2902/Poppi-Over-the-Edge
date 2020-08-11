@@ -7,7 +7,7 @@ import {PixelRatio } from 'react-native';
 //import source2 from '../assets/ground2.png';
 import source3 from '../assets/guards/guards.png';
 import groundSouce from '../assets/ground/lvl1.png';
-import penguinSource from '../assets/penguin/penguin1.png';
+import penguinSource from '../assets/penguin/penguin.png';
 
 
 // Importing sprites
@@ -18,6 +18,7 @@ import sprites3 from './Sprites/guardSheet';
 import groundSprites from './Sprites/ground';
 import penguinSprites from './Sprites/penguin';
 
+import backgroundImg from '../assets/background/lvl1.png'
 
 
 const {AnimatedSprite } = extras;
@@ -209,12 +210,12 @@ class Game {
   this_guard;
   this_background;
 
-  constructor(context, background, guard) {
+  constructor(context, guard) {
     // Sharp pixels
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     this.this_guard = guard;
-    this.this_background = background;
+    //this.this_background = background;
 
     this.app = new PIXI.Application({
       context,
@@ -247,8 +248,14 @@ class Game {
   // Async loading textures and backgrounds
   loadAsync = async () => {
 
+    setTimeout(() => {
+      this.loading(); 
+    }, 1000);
+
+    
+
     //Linking coordinates and background image
-    this.textures = await setupSpriteSheetAsync(this.this_background, sprites);
+    this.textures = await setupSpriteSheetAsync(backgroundImg, sprites);
 
     //Linking coordinates and background image
     //this.textures2 = await setupSpriteSheetAsync(source2, sprites2);
@@ -271,7 +278,12 @@ class Game {
       this.penguinTexture['penguin1'],
       this.penguinTexture['penguin2'],
       this.penguinTexture['penguin3'],
-      this.penguinTexture['penguin4'],
+      this.penguinTexture['penguin2'],
+      this.penguinTexture['penguin3'],
+      this.penguinTexture['penguin2'],
+      this.penguinTexture['penguin3'],
+      this.penguinTexture['penguin2'],
+      this.penguinTexture['penguin3'],
     ]);
 
     //Making bird global
@@ -299,7 +311,7 @@ class Game {
     // Adding objects to the screen
     [this.background, this.guard, this.caughtMessage, this.ground2 , this.bird].map(child =>
       this.app.stage.addChild(child),
-    );
+    ); 
 
 
     this.stopAnimating = false;
