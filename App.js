@@ -100,6 +100,7 @@ export default class App extends React.Component {
     isBinocularVisible: false,
     isLoadingVisible: false, 
     isLoaded: false,
+    stage: 1, 
     };
 
   // Funtion to Toggle In Game menu 
@@ -401,27 +402,6 @@ export default class App extends React.Component {
 
         <DisableBodyScrollingView >
 
-          <View style={{
-            userSelect: 'none',
-            position: 'absolute',
-            top: 15,
-            left: 15, }}>
-
-            <Card title={"Level " + this.state.currentLevel.level}>
-              <Text style={styles.paragraph}>
-                Stage {10 - this.guardsList.length + 1}/10
-            </Text>
-
-              <Text>5 X
-              <Image
-                  style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
-                  source={require('./assets/sleepingSpell.png')}
-                  resizeMode="contain"
-                />
-              </Text>
-            </Card>
-          </View>
-
           <GLView
             style={{ flex: 1, backgroundColor: 'black' }}
             onContextCreate={context => {
@@ -430,6 +410,9 @@ export default class App extends React.Component {
                 this.currentGuard = this.guardsList.pop();
                 let path = this.backgroundList.pop();
                 let bg = require('./assets/' + path);
+
+                this.setState({ stage: this.guardsList.length });
+
 
                 this.game = new Game(context, this.currentGuard.name);
 
@@ -451,6 +434,8 @@ export default class App extends React.Component {
             }}
           >
           </GLView>
+
+         
 
         </DisableBodyScrollingView>
 
@@ -518,7 +503,9 @@ export default class App extends React.Component {
 
       <div>
 
+
        
+
 
         {this.state.isInGameMenuVisible && (
           <Menu
@@ -577,6 +564,33 @@ export default class App extends React.Component {
             
           // </AnimatedSplash>
         }
+
+        {this.state.level_state == 'levelOne' && (
+          <View style={{
+            userSelect: 'none',
+            position: 'absolute',
+            top: 15,
+            left: 15,
+          }}>
+
+            <Card title={"Level " + this.state.currentLevel.level}>
+              <Text style={styles.paragraph}>
+                Stage {10 - this.state.stage}/10
+                {console.log(this.guardsList.length)}
+              </Text>
+
+              <Text>5 X
+              <Image
+                  style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
+                  source={require('./assets/sleepingSpell.png')}
+                  resizeMode="contain"
+                />
+              </Text>
+            </Card>
+          </View>
+
+        )}
+
         {this.state.isBinocularVisible && (<Binocular
 
         />)}

@@ -175,8 +175,8 @@ class Bird extends AnimatedSprite {
     this.animationSpeed = 0.00;
     this.anchor.set(0.5);
 
-    this.width = Settings.width/8;
-    this.height = Settings.height/4.1;
+    this.width = Settings.width/5;
+    this.height = Settings.height/2.5;
 
 
     this.speedY = Settings.playerFallSpeed;
@@ -190,7 +190,7 @@ class Bird extends AnimatedSprite {
     this.play();
     this.rotation = 0;
     this.position.x = Settings.width/2;
-    this.position.y = Settings.height/1.15;
+    this.position.y = Settings.height/1.30;
   };
 
 }
@@ -397,6 +397,7 @@ class Game {
           // Stopping bird moving
           this.bird.animationSpeed = 0.00;
 
+          this.bird.position.y = Settings.height / 1;
 
           //Poppi's head pops up in the binocular view, so I am moving it a little bit down
 
@@ -439,7 +440,8 @@ class Game {
   moveBack() {
     this.ground2.position.y = Settings.groundPositionY;
     this.edge.position.y = Settings.secondCloudPositionY;
-    this.bird.position.y = Settings.height/1.2;
+    //this.bird.position.y = Settings.height/1.2;
+    this.bird.restart(); 
   };
 
   restart = () => {
