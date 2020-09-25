@@ -25,44 +25,44 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel ,props, back}) => {
   
 
   const [items, setItems] = React.useState([
-    { name: 'Mountain', code: '#1abc9c', level: 1, background:'background/mountain.png'},
-        { name: 'Desert', code: '#34495e', level: 2, background:'background/desert.png'},
-    { name: 'Winterland', code: '#27ae60', level: 3, background: 'background/winterland.png' },
-    { name: 'Underwater', code: '#9b59b6', level: 4, background:'background/underwater.png'},
-    { name: 'Jungle', code: '#2ecc71', level: 5, background: 'background/jungle.jpg' },
-    { name: 'Halloween', code: '#16a085', level: 6, background:'background/halloween.png'},
-    { name: 'Ruins', code: '#3498db', level: 7, background: 'background/ruins.png' },
-    { name: '', code: '#2980b9', level: 8, background:'background/comingsoon.jpg'},
-    { name: '', code: '#8e44ad', level: 9,       background:'background/comingsoon.jpg'},
-    { name: '', code: '#2c3e50', level: 10,background:'background/comingsoon.jpg'},
-    { name: '', code: '#f1c40f', level: 11,    background:'background/comingsoon.jpg'},
-    { name: '', code: '#e67e22', level: 12,        background:'background/comingsoon.jpg'},
+    { name: 'Level 1', code: '#1abc9c', level: 1, background:''},
+    { name: 'Level 2', code: '#34495e', level: 2, background:'../../assets/background/orange.png'},
+    { name: 'Level 3', code: '#27ae60', level: 3, background: '../../assets/background/orange.png' },
+    // { name: 'Underwater', code: '#9b59b6', level: 4, background:'../../assets/background/orange.png'},
+    // { name: 'Jungle', code: '#2ecc71', level: 5, background: '../../assets/background/orange.jpg' },
+    // { name: 'Halloween', code: '#16a085', level: 6, background:'/../../assets/background/orange.png'},
+    // { name: 'Ruins', code: '#3498db', level: 7, background: '/../../assets/background/orange.png' },
+    // { name: '', code: '#2980b9', level: 8, background:'/../../assets/background/comingsoon.jpg'},
+    // { name: '', code: '#8e44ad', level: 9, background:'/../../assets/background/comingsoon.jpg'},
+    // { name: '', code: '#2c3e50', level: 10, background:'/../../assets/background/comingsoon.jpg'},
+    // { name: '', code: '#f1c40f', level: 11, background:'/../../assets/background/comingsoon.jpg'},
+    // { name: '', code: '#e67e22', level: 12, background:'/../../assets/background/comingsoon.jpg'},
     
   ]);
 
   
   let doSomething = (level) =>{
-    if(level<3)
+    // if(level<4)
       onPressLevelSelection(level)
-    else{
-      Alert.alert(
-        'Alert Title',
-        'My Alert Msg',
-        [
-          {
-            text: 'Ask me later',
-            onPress: () => console.log('Ask me later pressed')
-          },
-          {
-            text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel'
-          },
-          { text: 'OK', onPress: () => console.log('OK Pressed') }
-        ],
-        { cancelable: false }
-      );
-    }
+    // else{
+    //   Alert.alert(
+    //     'Alert Title',
+    //     'My Alert Msg',
+    //     [
+    //       {
+    //         text: 'Ask me later',
+    //         onPress: () => console.log('Ask me later pressed')
+    //       },
+    //       {
+    //         text: 'Cancel',
+    //         onPress: () => console.log('Cancel Pressed'),
+    //         style: 'cancel'
+    //       },
+    //       { text: 'OK', onPress: () => console.log('OK Pressed') }
+    //     ],
+    //     { cancelable: false }
+    //   );
+    // }
   }
 
   return (
@@ -82,15 +82,15 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel ,props, back}) => {
        
           <TouchableOpacity
             onPress={() =>  doSomething(item.level)}>
-          <ImageBackground  imageStyle={{ borderRadius: 5 }} source={require('../../assets/' + item.background)}>
+          {/* <ImageBackground  imageStyle={{ borderRadius: 5 }} source={require(item.background)}> */}
 
-          <View style={[styles.itemContainer]}>
-              <Text style={styles.itemName}>{item.name}</Text>
+            <View style={[styles.itemContainer, { backgroundColor: item.code }]}>
+              {/* <Text style={styles.itemName}>{item.name}</Text> */}
 
             <Text style={styles.itemName}>Level {item.level}</Text>
           
           </View>
-          </ImageBackground>
+          {/* </ImageBackground> */}
           </TouchableOpacity>
         </View>
       )}

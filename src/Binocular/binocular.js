@@ -35,7 +35,7 @@ const Binocular = ({ backToMainMenu, onMenuToggle }) => {
                 alignItems: "center",
                 opacity: fadeAnim,
 
-            }} source={require('../../assets/binoculus2.png')} ></Animated.Image>
+            }} source={require('../../assets/binoculus5.png')} ></Animated.Image>
 
             {/* <View style={styles.root}>
                 <Button
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 9999999999, // active card will have a zIndex of `e.timeStamp`- so this needs to be larger
+        zIndex: 100, // active card will have a zIndex of `e.timeStamp`- so this needs to be larger
     },
     image:{
         ...StyleSheet.absoluteFillObject,

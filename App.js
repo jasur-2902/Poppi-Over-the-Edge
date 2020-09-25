@@ -1,4 +1,4 @@
-import { GLView } from 'expo';
+import { GLView } from 'expo-gl';
 import * as React from 'react';
 import {Animated, Image, Text, View, TouchableOpacity } from 'react-native';
 import Modal from 'modal-enhanced-react-native-web';
@@ -11,10 +11,15 @@ import Game from './src/game';
 import { AsyncStorage } from "react-native";
 import sprites3 from './src/Sprites/guardSheet';
 import MainMenu from "./src/Menu/mainmenu";
+import CustomLevel from "./src/Menu/customLevel";
 import Menu from "./src/Menu/inGameMenu";
 import Binocular from "./src/Binocular/binocular"
 import LevelSelection from "./src/Menu/LevelSelection";
-import Loading from "./src/Loading/loading"
+import Loading from "./src/Loading/loading";
+import LoginId from "./src/LoginID/loginId";
+
+
+import { firebase } from './src/firebase/config';
 
 
 import AnimatedSplash from "react-native-animated-splash-screen";
@@ -23,13 +28,20 @@ import AnimatedSplash from "react-native-animated-splash-screen";
 export default class App extends React.Component {
 
 
+
+  
+
+
   // Global Variables 
 
   guardsList = [];
   backgroundList = [];
-  numberOfCards = 58;
+  numberOfCards = 30;
   game = null;
   currentGuard;
+  gameResult = []; 
+  userId = 77777; 
+  gameStats = new Map(); 
 
 
   // Backgrounds for Level 1 Stages 
@@ -49,6 +61,8 @@ export default class App extends React.Component {
     max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
     background: this.level1_backgrounds,
+    time: 3000, 
+    type: "regular", 
   };
 
   // Backgrounds for Level 2 Stages 
@@ -68,6 +82,8 @@ export default class App extends React.Component {
     max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
     background: this.level2_backgrounds,
+    time: 2500,
+    type: "regular", 
   };
 
   level3_Settings = {
@@ -77,11 +93,26 @@ export default class App extends React.Component {
     yellow: 3, // number of yellow guards in this level
     red: 2, // number of red guards in this level
     max_repetition: 4, // max number of one type of the guard repeats
-    min_repetition: 1
+    min_repetition: 1,
+    time: 2000, 
+    type: "regular", 
   };
 
+  custom_Settings = {
+    level: 3, //level
+    max: 4, // maximum number of guards
+    green: 5, // number of green guards in this level
+    yellow: 3, // number of yellow guards in this level
+    red: 2, // number of red guards in this level
+    max_repetition: 4, // max number of one type of the guard repeats
+    min_repetition: 1,
+    time: 2000,
+    type: "custom", 
+  };
+
+
   state = {
-    level_state: 'menu', // Current state of the app: menu = Main Menu 
+    level_state: 'login', // Current state of the app: menu = Main Menu 
     sleepingPills: 0, // Number of sleeping pills 
     modalVisible: false, // Dialog view visability 
     visibleLost: false, // Lost Dialog view visability 
@@ -103,15 +134,6 @@ export default class App extends React.Component {
     stage: 1, 
     };
 
-  // Funtion to Toggle In Game menu 
-  onMenuToggle = () => {
-    console.log("it's working ")
-    this.setState((state) => ({
-      isInGameMenuVisible: !this.state.isInGameMenuVisible,
-    }));
-  };
-
-  
 
   // List of available levels' settings.
   levels = { //TODO only 3 levels are available rn, add more levels 
@@ -120,16 +142,53 @@ export default class App extends React.Component {
     3: this.level3_Settings,
   }
 
+
+  // Funtion to Toggle In Game menu 
+  onMenuToggle = () => {
+    console.log("it's working ")
+    this.setState((state) => ({
+      isInGameMenuVisible: !this.state.isInGameMenuVisible,
+    }));
+  };
+
+   entityRef = firebase.firestore().collection('entities');
+
+  _firebaseTest = () =>{
+    // this.entityRef
+    //   .add("data")
+    //   .then(_doc => {
+    //     setEntityText('')
+    //     Keyboard.dismiss()
+    //   })
+    //   .catch((error) => {
+    //     alert(error)
+    //   });
+
+    firebase.database().ref('users/' + this.userId + '/' + this.gameStats["timeStamp"]).set({
+      id: this.userId,
+      level: this.gameStats["level"],
+      result: this.gameStats["result"],
+      givenTime: this.gameStats["givenTime"],
+      timeSpent: this.gameStats["timeSpent"],
+      numOfguards: this.gameStats["numOfguards"],
+      timeStamp: this.gameStats["timeStamp"],
+    });
+
+
+  }
+
   // a function that saves data asyncronously
   _storeData = async () => {
+
+
     try {
-      await AsyncStorage.setItem('current_level', JSON.stringify(this.state.currentLevel)).then(() => {
-       // console.log('It was saved successfully')
-     //   console.log(JSON.stringify(this.state.currentLevel))
-      })
-        .catch(() => {
-          console.log('There was an error saving the product')
-        });
+      // await AsyncStorage.setItem('current_level', JSON.stringify(this.state.highestLevel)).then(() => {
+      //   console.log('It was saved successfully')
+      //   // console.log(JSON.stringify(this.state.highestLevel)); 
+      // })
+      //   .catch(() => {
+      //     console.log('There was anerror saving the product')
+      //   });
        await AsyncStorage.setItem('highest_level', this.state.highestLevel);
 
     } catch (error) {
@@ -140,13 +199,15 @@ export default class App extends React.Component {
   // fetch the data back asyncronously
   _retrieveData = async () => {
     try {
-      const current_level = await AsyncStorage.getItem('current_level');
+      // const current_level = await AsyncStorage.getItem('current_level');
       const highest_level = await AsyncStorage.getItem('highest_level');
-      if (current_level !== null && highest_level !== null) {
+      if (highest_level !== null) {
 
         // Our data is fetched successfully
         //this.setState({ highestLevel: highest_level });
-        this.setState({ currentLevel: current_level })
+        this.setState({ highestLevel: highest_level })
+
+        console.log(highest_level);
       }
       else{
         console.log("null")
@@ -164,7 +225,6 @@ export default class App extends React.Component {
     this.backgroundList = [];
     let random;  // returns a random integer from 0 to 10;
 
-
     let green = level.green;
     let yellow = level.yellow;
     let red = level.red;
@@ -180,6 +240,7 @@ export default class App extends React.Component {
       random = Math.floor(Math.random() * this.numberOfCards);
 
       temp = sprites3[random];
+      console.log(temp);
 
       if (dic[temp.number] < level.max_repetition) {
         if (temp.number == 1 && dic[1] > 2) {
@@ -244,7 +305,7 @@ export default class App extends React.Component {
         // Hide the content in screen when state object "content" is false.
         this.state.result && !this.state.isListEmpty ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!
 
-        {this._renderButton("Next Stage", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'walking' });})}
+        {this._renderButton("Next Stage", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'walking' }); this.game.destroyGame() })}
 
         </Text> : null
 
@@ -256,12 +317,41 @@ export default class App extends React.Component {
         this.state.win ? <Text style={styles.headerText}> {"\n"}Congratulations, you won!
 
         {
+          
           this._renderButton("Next Level", () => {
-            this.setState({ level_1: false });
-            this.setState({ visibleModal: false });
-            this.setState({ level_state: 'create_list' });
-            this.setState({ currentLevel: this.levels[(this.state.currentLevel.level + 1)], win: false, isListEmpty:false });})}
 
+            if(this.state.currentLevel.type == "regular"){
+              this.setState({
+                level_1: false,
+                visibleModal: false, 
+                level_state: 'create_list',
+                isLoadingVisible: true,
+                currentLevel: this.levels[(this.state.currentLevel.level + 1)], 
+                win: false, isListEmpty: false }); 
+              
+              }
+            else{
+              console.log("ELSEO");
+              this.game.stopAnimating = true; 
+              this.setState({
+                level_1: false, 
+                visibleModal: false, 
+                level_state: "menu",
+                currentLevel: this.levels[1], 
+
+                win: false, 
+                isListEmpty: false, 
+              });
+
+            }
+              }
+             
+             
+             
+             
+             )}
+            
+ 
         </Text> : null
 
       }
@@ -283,14 +373,26 @@ export default class App extends React.Component {
  checkForResult(userChoice){
 
     if(userChoice == this.currentGuard.number){
+
+      { this.gameResult.push("Correct") }
+      { this.gameStats["result"] = "Correct"}
+      // { console.log(this.gameResult) }
+      // { console.log(this.gameStats) }
+      // { console.log(this.gameStats['level']) }
+      { this._firebaseTest()}
       if(!this.state.isListEmpty)
         !this.setState({ result: true });
       else
         this.setState({win: true});
     }
     else{
+      { this.gameResult.push("Incorrect") }
+      { this.gameStats["result"] = "Incorrect" }
+      { this._firebaseTest() }
+      // { console.log(this.gameResult) }
       this.setState({ visibleModal: null });
       this.setState({visibleLost: true });
+
     }
 
  }
@@ -309,11 +411,18 @@ export default class App extends React.Component {
     <View style={styles.modalContent}>
       <Text>The Guards caught you! Please Try Again! </Text>
       {this._renderButton("Try Again!", () => {
+        { this.gameStats["result"] = "Caught" }
+        { this.gameResult.push("Caught") }
+        { console.log(this.gameResult) }
+        { this._firebaseTest() }
         this.setState({ level_state: 'create_list' }); this.setState({ visibleCaught: false });
       })}
-    </View>
-  );
+     
 
+    </View>
+
+    
+  );
 
   displayQuestions = () =>{
 
@@ -323,6 +432,7 @@ export default class App extends React.Component {
       }
     else{
       this.setState({ visibleCaught: true });
+      this.game.onPressOut(); 
     }
   };
 
@@ -338,7 +448,7 @@ export default class App extends React.Component {
   };
 
   stopWalking = () =>{
-    this.setState({ walking: false, isLoadingVisible: true });
+    this.setState({ walking: false, isLoadingVisible: false });
     this.setState({ level_state: 'levelOne' })
     this.setState({ result: false });
   }
@@ -353,11 +463,11 @@ export default class App extends React.Component {
 
   startGame = () => {
     this.setState({
+      highestLevel: 2, 
       isMainMenuVisible: false,
       isLoadingVisible: true, 
       level_state: 'create_list',
     });
-
   };
   
 
@@ -368,12 +478,40 @@ export default class App extends React.Component {
      }));
     }
 
+  toggleCustomLevel = () => {
+    console.log("it's working")
+        this.setState((state) => ({
+        level_state: 'custom_level',
+    }));
+  }
 
+  
   toggleLoadingPage = (state) => {
     console.log("it's working")
     this.setState((state) => ({
       isLoadingVisible: false,
     }));
+  }
+  
+
+  // Creating custom level settings 
+  startCustomLevel = (time,level) => {
+
+    let levelSettingsCopy = this.levels[level];
+
+    this.custom_Settings.level = level; 
+    this.custom_Settings.time = time*1000; 
+    this.custom_Settings.max = levelSettingsCopy.max; 
+    this.custom_Settings.green = levelSettingsCopy.green; 
+    this.custom_Settings.yellow = levelSettingsCopy.yellow; 
+    this.custom_Settings.red = levelSettingsCopy.red; 
+    this.custom_Settings.max_repetition = levelSettingsCopy.max_repetition; 
+    this.custom_Settings.min_repetition = levelSettingsCopy.min_repetition; 
+
+     
+    this.setState({ currentLevel: this.custom_Settings, level_state: 'create_list' }); 
+
+    console.log("Custom Level ", levelSettingsCopy);
   }
 
   selectedLevel = 0;
@@ -393,9 +531,24 @@ export default class App extends React.Component {
   }
 
 
+  addTimeSpent = (time) =>{
+    this.gameResult.push(time);
+    this.gameStats["timeSpent"] = time; 
+    console.log("Time spent: " + time ); 
+  }
+
+
+  receiveUserId = (userId) =>{
+
+    console.log("User Id: " + userId);
+    this.setState({level_state: 'menu'}); 
+    this.userId = userId; 
+
+  }
+
+
   levelOne = (
 
-   
     <View>  
           
       <View style={[{ width: '100vw', height: '100vh', overflow: 'hidden' }]}>
@@ -408,27 +561,56 @@ export default class App extends React.Component {
               if (this.guardsList.length > 1) {
 
                 this.currentGuard = this.guardsList.pop();
-                let path = this.backgroundList.pop();
-                let bg = require('./assets/' + path);
+               // let path = this.backgroundList.pop();
+               // let bg = require('./assets/' + path);
+
+                console.log("Current Guard: " + this.currentGuard.number);
+              
+                // Adding timestamp 
+                this.gameStats["timeStamp"] = Date.now(); 
+                this.gameResult.push( Date.now());
+
+                //Adding number of guards 
+                this.gameStats["numOfguards"] = this.currentGuard.number; 
+                this.gameResult.push(this.currentGuard.number);
+
+                //Adding level 
+                this.gameStats["level"] = this.state.currentLevel.level;
+                this.gameResult.push(this.state.currentLevel.level);
+                
+                //Time Limit
+                this.gameStats["givenTime"] = this.state.currentLevel.time;
+                this.gameResult.push(this.state.currentLevel.time); 
+
 
                 this.setState({ stage: this.guardsList.length });
 
+                this._storeData();
+                this._retrieveData();
 
-                this.game = new Game(context, this.currentGuard.name);
+                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time);
+
+                console.log("guard name", this.currentGuard.name);
 
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
                 this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
+                this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
 
               }
               else {
                 this.setState({ isListEmpty: true })
                 this.currentGuard = this.guardsList.pop();
-                let path = this.backgroundList.pop();
-                let bg = require('./assets/' + path);
+                //let path = this.backgroundList.pop();
+                console.log("Current Guard: " + this.currentGuard);
 
-                this.game = new Game(context, bg, this.currentGuard.name);
+                //let bg = require('./assets/' + path);
 
-                this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
+                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time);
+
+                this.game.onScore = binocularState => this.toggleBinocular(binocularState);
+                this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
+                this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
+                //this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
               }
 
             }}
@@ -445,35 +627,7 @@ export default class App extends React.Component {
       {/* ======================================================================================= */}
 
 
-      <View
-        style={{
-          userSelect: 'none',
-          position: 'absolute',
-          bottom: 50,
-          left: 100, }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
-          <Image
-            style={{ width: 100, userSelect: 'none', height: 100 }}
-            source={require('./assets/binoculars6.png')}
-            resizeMode="contain"/>
-          {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={{
-          userSelect: 'none',
-          position: 'absolute',
-          bottom: 50,
-          left: 100,
-        }}
-        onLongPress={() => {
-          this.game.onPress(); console.log("it's been pressed");
-        }}
-        onPressOut={() => { this.displayQuestions(); this.toggleBinocular() }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
-        </View>
-      </TouchableOpacity>
+      
 
       <CircleButton
         onPress={this.onMenuToggle}
@@ -503,9 +657,8 @@ export default class App extends React.Component {
 
       <div>
 
-
        
-
+      {console.log("Highest levle: "+this.state.highestLevel)}
 
         {this.state.isInGameMenuVisible && (
           <Menu
@@ -531,13 +684,26 @@ export default class App extends React.Component {
         {this.state.level_state == 'menu' && !this.state.isLevelsMenuVisible && (
             <MainMenu
               startGame={this.startGame}
+              customLevel={this.toggleCustomLevel}
               levelSelectionMenu = {this.levelSelectionMenu}
             />) 
+        }
+        {this.state.level_state == 'login' && !this.state.isLevelsMenuVisible && (
+          <LoginId
+            receiveUserId={this.receiveUserId}
+          />)
+        }
+
+        {this.state.level_state == 'custom_level'  && (
+          <CustomLevel
+            startCustomLevel={this.startCustomLevel}
+            back = {this.backToMainMenu}
+          />)
         }
 
           {this.state.isLevelsMenuVisible && (
             <LevelSelection
-            selectedLevel={selectedLevel}
+           // selectedLevel={selectedLevel}
             onPressLevelSelection ={this.onPressLevelSelection}
             back={this.levelSelectionMenu}
             />
@@ -550,8 +716,16 @@ export default class App extends React.Component {
             </WalkingComponent>
           </React.Suspense>
         )}
-        {this.state.level_state == 'levelOne' && 
-        
+       
+
+       
+
+        {this.state.isBinocularVisible && (<Binocular
+
+        />)}
+
+        {this.state.level_state == 'levelOne' &&
+
           // <AnimatedSplash
           //   translucent={true}
           //   isLoaded={this.state.isLoaded}
@@ -560,10 +734,49 @@ export default class App extends React.Component {
           //   logoHeight={150}
           //   logoWidth={150}
           // >            
-            this.StockChart.preload()
-            
+          this.StockChart.preload()
+
           // </AnimatedSplash>
         }
+
+        {this.state.level_state == 'levelOne' &&(
+          <View style= {{
+              zIndex: 99999
+            }}>
+         <View
+            style={{
+              userSelect: 'none',
+              position: 'absolute',
+              bottom: 50,
+              left: 100,
+              zIndex: 99999
+            }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
+              <Image
+                style={{ width: 100, userSelect: 'none', height: 100 }}
+                source={require('./assets/binoculars6.png')}
+                resizeMode="contain" />
+              {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={{
+              userSelect: 'none',
+              position: 'absolute',
+              bottom: 50,
+              left: 100,
+              zIndex: 99999
+            }}
+            onLongPress={() => {
+              this.game.onPress(); console.log("it's been pressed");
+            }}
+            onPressOut={() => { this.displayQuestions(); this.toggleBinocular() }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
+            </View>
+          </TouchableOpacity>
+          </View>
+        )}
 
         {this.state.level_state == 'levelOne' && (
           <View style={{
@@ -591,12 +804,8 @@ export default class App extends React.Component {
 
         )}
 
-        {this.state.isBinocularVisible && (<Binocular
-
-        />)}
-
         {this.state.isLoadingVisible && (<Loading
-
+          
         />)}
       </div>
     );

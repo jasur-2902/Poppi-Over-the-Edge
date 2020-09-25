@@ -65,3 +65,5 @@ typings/
 web-build/
 web-report/
 .expo/
+assets/.DS_Store
+yarn.lock

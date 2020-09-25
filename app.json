@@ -4,7 +4,6 @@
     "description": "A side-scroller where the player controls a bird, attempting to fly between columns of green pipes without hitting them.",
     "slug": "poppi",
     "privacy": "unlisted",
-    "sdkVersion": "32.0.0",
     "version": "1.0.0",
     "orientation": "portrait",
     "primaryColor": "#91DE78",
@@ -26,7 +25,6 @@
     },
     "platforms": [
       "android",
-
       "ios"
     ]
   }

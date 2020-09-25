@@ -10,18 +10,18 @@ import {
 import colors from "../../assets/constants/colors";
 import Button from "../../assets/Button";
 
-const Menu = ({ numPlayers, onNumPlayersChange, startGame, levelSelectionMenu }) => {
+const Menu = ({ startGame, levelSelectionMenu, customLevel }) => {
   return (
     <View style={styles.root}>
       <ImageBackground source={require("../../assets/trianglify.png")} style={styles.root}>
-        <>
+     
           <Text style={styles.text}>POPPI OVER THE EDGE</Text>
          
 
           <Button
             color={colors.yellowLight}
             onPress={startGame}
-            style={{ marginTop: 24 },styles.button}
+            style={[{ marginTop: 24 },styles.button]}
           >
             <Text style={styles.button_text}>START GAME</Text>
           </Button>
@@ -33,6 +33,14 @@ const Menu = ({ numPlayers, onNumPlayersChange, startGame, levelSelectionMenu })
           >
              <Text style={styles.button_text}>SELECT LEVEL</Text>
           </Button>
+          
+          <Button
+          onPress={customLevel}
+          style={styles.button}
+          >
+            <Text style={styles.button_text}>CUSTOM LEVEL</Text>
+          </Button>
+          
           <Button
             style={styles.button}
           >
@@ -47,7 +55,7 @@ const Menu = ({ numPlayers, onNumPlayersChange, startGame, levelSelectionMenu })
               {music.paused ? "🔇 " : "🔈 "} MUSIC
             </Button>
           )} */}
-        </>
+
         {/* {state.isLevelsMenuVisible && <View> 
         <Button
             onPress={() => onNumPlayersChange(2)}

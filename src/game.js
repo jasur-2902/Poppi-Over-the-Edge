@@ -5,8 +5,19 @@ import {PixelRatio } from 'react-native';
 
 // Importing backgrounds and assets
 //import source2 from '../assets/ground2.png';
-import source3 from '../assets/guards/guards.png';
-import groundSouce from '../assets/ground/lvl1.png';
+//import source3 from '../assets/guards/guards_s.png';
+
+import panda from '../assets/guards/panda_n.png';
+import sloth from '../assets/guards/sloth_n.png';
+import monkey from '../assets/guards/monkey_n.png';
+import pandaCaught from '../assets/guards/panda_caught.png';
+import slothCaught from '../assets/guards/sloth_caught.png';
+import monkeyCaught from '../assets/guards/monkey_caught.png';
+
+
+
+//import caught_message from '../assets/guards/caught_s.png';
+import groundSouce from '../assets/ground/lvl1_s.png';
 import penguinSource from '../assets/penguin/penguin.png';
 
 
@@ -18,7 +29,7 @@ import sprites3 from './Sprites/guardSheet';
 import groundSprites from './Sprites/ground';
 import penguinSprites from './Sprites/penguin';
 
-import backgroundImg from '../assets/background/lvl1.png'
+import backgroundImg from '../assets/background/lvl1_s.png';
 
 
 const {AnimatedSprite } = extras;
@@ -41,7 +52,7 @@ let Settings = {
   playerGravity: 0 * scale,
   minPipeHeight: 50 * scale,
   pipeVerticalGap: 190 * scale, //180 is pretty legit
-  gameSpeed: 15 * 0.25, // Game speed
+  gameSpeed: 20 * 0.25, // Game speed
   guardWidth: 140 * scale,
   guardHeight: 140 * scale,
   secondCloudPositionY: 0,
@@ -88,7 +99,6 @@ class SideClouds extends Sprite {
   constructor(texture) {
     super(texture, Settings.width, Settings.groundHeight);
 
-
     this.width = Settings.width;
     this.height = Settings.height/4;
     this.position.x = 0;
@@ -131,9 +141,7 @@ class CaughtMessage extends Sprite {
     this.height = Settings.height/3;
     this.position.x = Settings.width/2.5;
     this.position.y = Settings.skyHeight ;
-
   }
-
 }
 
 // Guard Object
@@ -144,10 +152,10 @@ class Guard extends Sprite {
     this.scale.set(scale * 2);
 
 
-    this.width = Settings.width/3.5;
-    this.height = Settings.height/1.8;
+    this.width = Settings.width/2.8;
+    this.height = Settings.height/1.5;
 
-    this.position.x = Settings.width/2.5;
+    this.position.x = Settings.width/2.9;
 
     this.position.y = Settings.height;
   }
@@ -206,16 +214,19 @@ class Game {
   score = 0;
   isButtonReleased = false;
   userLost = false;
-
+  time; 
+  caughtTexture; 
   this_guard;
   this_background;
-
-  constructor(context, guard) {
+  guardTextute; 
+  constructor(context, guard, random, time) {
     // Sharp pixels
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     this.this_guard = guard;
     //this.this_background = background;
+
+    Settings.caughtMessageTime = time;
 
     this.app = new PIXI.Application({
       context,
@@ -230,7 +241,10 @@ class Game {
     Settings.height = this.app.renderer.height;
     Settings.skyHeight = Settings.height - Settings.groundHeight;
     Settings.pipeHorizontalGap = Settings.pipeWidth * 5;
-    this.loadAsync();
+
+    
+
+    this.loadAsync(random);
   }
 
   // Resize function window
@@ -245,8 +259,17 @@ class Game {
     // }
   };
 
+  destroyGame = () => {
+    this.stopAnimating = true; 
+    this.bird = null; 
+    this.guard = null; 
+    this. ground = null; 
+    this.background = null;
+  }
+
+
   // Async loading textures and backgrounds
-  loadAsync = async () => {
+  loadAsync = async (random) => {
 
     setTimeout(() => {
       this.loading(); 
@@ -261,9 +284,26 @@ class Game {
     //this.textures2 = await setupSpriteSheetAsync(source2, sprites2);
 
     //Linking guards and background image
-    this.guardTextute = await setupSpriteSheetAsync(source3, sprites3);
     this.groundTexture = await setupSpriteSheetAsync(groundSouce, groundSprites);
     this.penguinTexture = await setupSpriteSheetAsync(penguinSource, penguinSprites);
+
+    
+
+    console.log("Color - " + random);
+    if(random == 1){
+      this.guardTextute = await setupSpriteSheetAsync(panda, sprites3);
+      this.caughtTexture = await setupSpriteSheetAsync(pandaCaught, sprites3);
+
+    }
+    else if(random == 0){
+      this.guardTextute = await setupSpriteSheetAsync(sloth, sprites3);
+      this.caughtTexture = await setupSpriteSheetAsync(slothCaught, sprites3);
+    }
+    else {
+      this.guardTextute = await setupSpriteSheetAsync(monkey, sprites3);
+      this.caughtTexture = await setupSpriteSheetAsync(monkeyCaught, sprites3);
+    }
+
 
     this.onAssetsLoaded();
   };
@@ -303,7 +343,7 @@ class Game {
 
     //console.log(this.guardTextute[]);
 
-    this.guard = new Guard(this.guardTextute.guard10);
+   // this.guard = new Guard(this.guardTextute.guard10);
 
     this.guard = new Guard(this.guardTextute[this.this_guard]);
 
@@ -369,6 +409,8 @@ class Game {
     }
 
   };
+  
+  beginning; 
 
   moveToTheEdge = () => {
 
@@ -397,13 +439,15 @@ class Game {
           // Stopping bird moving
           this.bird.animationSpeed = 0.00;
 
-          this.bird.position.y = Settings.height / 1;
+          this.bird.position.y = Settings.height /0;
 
           //Poppi's head pops up in the binocular view, so I am moving it a little bit down
 
 
           // Making edge invisible
           this.ground2.position.y = Settings.skyHeight;
+
+          this.beginning = new Date();
 
         }, 200);
 
@@ -429,8 +473,18 @@ class Game {
   loseMessage() {
     if (!this.isButtonReleased) {
       //console.log("Lose Message!");
-      this.caughtMessage.position.y = Settings.height * 0.3;
+      //this.caughtMessage.position.y = Settings.height * 0.3;
       this.userLost = true;
+
+      this.guard.texture = this.caughtTexture[this.this_guard]; 
+
+      let end = new Date();
+      
+
+      //Counting time elapsed 
+      let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000);
+      this.timeSpent(time);
+
     }
     else { // Some debugging
       this.ground2.position.y = Settings.groundPositionY;
@@ -441,6 +495,15 @@ class Game {
     this.ground2.position.y = Settings.groundPositionY;
     this.edge.position.y = Settings.secondCloudPositionY;
     //this.bird.position.y = Settings.height/1.2;
+
+    let end = new Date (); 
+
+    //Counting time elapsed 
+    let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000); 
+    this.timeSpent(time);
+
+    //console.log("Time spent: " + time ); 
+
     this.bird.restart(); 
   };
 

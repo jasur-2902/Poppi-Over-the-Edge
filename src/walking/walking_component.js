@@ -5,7 +5,7 @@ import { Animated, StyleSheet, TouchableOpacity, View, Image } from "react-nativ
 import colors from "../../assets/constants/colors";
 import DisableBodyScrollingView from '../../components/DisableBodyScrollingView';
 
-import { GLView } from 'expo';
+import { GLView } from 'expo-gl';
 
 
 import { PIXI } from 'expo-pixi';
