@@ -28,6 +28,8 @@ let LevelSelection = ({ onPressLevelSelection, selectedLevel ,props, back}) => {
     { name: 'Level 1', code: '#1abc9c', level: 1, background:''},
     { name: 'Level 2', code: '#34495e', level: 2, background:'../../assets/background/orange.png'},
     { name: 'Level 3', code: '#27ae60', level: 3, background: '../../assets/background/orange.png' },
+    { name: 'Level 4', code: '#2ecc71', level: 4, background: '../../assets/background/orange.png' },
+    { name: 'Level 5', code: '#8e44ad', level: 5, background: '../../assets/background/orange.png' },
     // { name: 'Underwater', code: '#9b59b6', level: 4, background:'../../assets/background/orange.png'},
     // { name: 'Jungle', code: '#2ecc71', level: 5, background: '../../assets/background/orange.jpg' },
     // { name: 'Halloween', code: '#16a085', level: 6, background:'/../../assets/background/orange.png'},

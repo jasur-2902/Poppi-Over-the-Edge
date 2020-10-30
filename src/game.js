@@ -7,12 +7,12 @@ import {PixelRatio } from 'react-native';
 //import source2 from '../assets/ground2.png';
 //import source3 from '../assets/guards/guards_s.png';
 
-import panda from '../assets/guards/panda_n.png';
-import sloth from '../assets/guards/sloth_n.png';
-import monkey from '../assets/guards/monkey_n.png';
-import pandaCaught from '../assets/guards/panda_caught.png';
-import slothCaught from '../assets/guards/sloth_caught.png';
-import monkeyCaught from '../assets/guards/monkey_caught.png';
+import panda from '../assets/guards/panda_n_updated.png';
+import sloth from '../assets/guards/sloth_n_updated.png';
+import monkey from '../assets/guards/monkey_n_updated.png';
+import pandaCaught from '../assets/guards/panda_caught_updated.png';
+import slothCaught from '../assets/guards/sloth_caught_updated.png';
+import monkeyCaught from '../assets/guards/monkey_caught_updated.png';
 
 
 
@@ -52,7 +52,7 @@ let Settings = {
   playerGravity: 0 * scale,
   minPipeHeight: 50 * scale,
   pipeVerticalGap: 190 * scale, //180 is pretty legit
-  gameSpeed: 20 * 0.25, // Game speed
+  gameSpeed: 25 * 0.25, // Game speed
   guardWidth: 140 * scale,
   guardHeight: 140 * scale,
   secondCloudPositionY: 0,
@@ -268,12 +268,46 @@ class Game {
   }
 
 
+  changeGuard = async(guard, random, time) =>{
+    
+    this.this_guard = guard;
+
+    Settings.caughtMessageTime = time;
+
+    console.log("Color - " + random);
+    // if (random == 1) {
+    //   this.guardTextute =  await setupSpriteSheetAsync(panda, sprites3);
+    //   this.caughtTexture =  await setupSpriteSheetAsync(pandaCaught, sprites3);
+
+    // }
+    // else if (random == 0) {
+    //   this.guardTextute =  await setupSpriteSheetAsync(sloth, sprites3);
+    //   this.caughtTexture =  await setupSpriteSheetAsync(slothCaught, sprites3);
+    // }
+    // else {
+    //   this.guardTextute =  await setupSpriteSheetAsync(monkey, sprites3);
+    //   this.caughtTexture =  await setupSpriteSheetAsync(monkeyCaught, sprites3);
+    // }
+
+    this.loadAsync(random);
+
+    this.guard = new Guard(this.guardTextute[guard]);
+    
+
+  }
+
+  toggleLoadingPage = () =>{
+    setTimeout(() => {
+      this.loading();
+    }, 300);
+
+  }
+
+
   // Async loading textures and backgrounds
   loadAsync = async (random) => {
 
-    setTimeout(() => {
-      this.loading(); 
-    }, 1000);
+    
 
     
 
@@ -286,8 +320,6 @@ class Game {
     //Linking guards and background image
     this.groundTexture = await setupSpriteSheetAsync(groundSouce, groundSprites);
     this.penguinTexture = await setupSpriteSheetAsync(penguinSource, penguinSprites);
-
-    
 
     console.log("Color - " + random);
     if(random == 1){
@@ -305,7 +337,12 @@ class Game {
     }
 
 
+    
     this.onAssetsLoaded();
+    setTimeout(() => {
+      console.log("Togle Loading Page in game js");
+      this.loading();
+    }, 400);
   };
 
   onAssetsLoaded = () => {
@@ -380,9 +417,24 @@ class Game {
 
   //Function which will run once user releases the button
   onPressOut = () =>{
-    this.ground2.moveGround = false;
-    this.moveBack();
-    this.bird.animationSpeed = 0;
+
+    if (this.binocularState){
+      console.log("Button released on time");
+      this.moveBack();
+      this.ground2.moveGround = false;
+      this.bird.animationSpeed = 0;
+
+    }
+    else{
+      console.log("Button released late");
+      this.bird.animationSpeed = 0;
+      this.isStarted = false;
+      this.ground2.position.y = Settings.groundPositionY;
+      this.edge.position.y = Settings.secondCloudPositionY;
+      this.bird.restart(); 
+      
+    }
+    
 
   }
 
@@ -411,7 +463,7 @@ class Game {
   };
   
   beginning; 
-
+  binocularState = false;
   moveToTheEdge = () => {
 
     if (!this.ground2.groundDown) {

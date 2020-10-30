@@ -13,7 +13,7 @@ const Loading = ({ backToMainMenu, onMenuToggle }) => {
             fadeAnim,
             {
                 toValue: 1,
-                duration: 300,
+                duration: 500,
             }
         ).start();
     }, [fadeAnim])

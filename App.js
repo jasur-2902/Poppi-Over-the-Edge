@@ -36,12 +36,13 @@ export default class App extends React.Component {
 
   guardsList = [];
   backgroundList = [];
-  numberOfCards = 30;
+  numberOfCards = 48;
   game = null;
   currentGuard;
   gameResult = []; 
   userId = 77777; 
   gameStats = new Map(); 
+  NUMBEROFSTAGES = 10;
 
 
   // Backgrounds for Level 1 Stages 
@@ -60,6 +61,7 @@ export default class App extends React.Component {
     red: 0, // number of red guards in this level
     max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
+    numberOfOnes: 6, // how many times 1 will repeat 
     background: this.level1_backgrounds,
     time: 3000, 
     type: "regular", 
@@ -82,20 +84,48 @@ export default class App extends React.Component {
     max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 2,
     background: this.level2_backgrounds,
+    numberOfOnes: 3, // how many times 1 will repeat 
     time: 2500,
     type: "regular", 
   };
 
   level3_Settings = {
     level: 3, //level
-    max: 4, // maximum number of guards
+    max: 5, // maximum number of guards
     green: 5, // number of green guards in this level
     yellow: 3, // number of yellow guards in this level
     red: 2, // number of red guards in this level
-    max_repetition: 4, // max number of one type of the guard repeats
+    max_repetition: 2, // max number of one type of the guard repeats
     min_repetition: 1,
+    numberOfOnes: 0, // how many times 1 will repeat 
     time: 2000, 
     type: "regular", 
+  };
+
+  level4_Settings = {
+    level: 4, //level
+    max: 5, // maximum number of guards in a stage
+    green: 4, // number of green guards in this level
+    yellow: 3, // number of yellow guards in this level
+    red: 4, // number of red guards in this level
+    max_repetition: 2, // max number of one type of the guard repeats
+    min_repetition: 1,
+    numberOfOnes: 0, // how many times 1 will repeat 
+    time: 2500,
+    type: "regular",
+  };
+
+  level5_Settings = {
+    level: 5, //level
+    max: 5, // maximum number of guards in a stage
+    green: 3, // number of green guards in this level
+    yellow: 3, // number of yellow guards in this level
+    red: 4, // number of red guards in this level
+    max_repetition: 2, // max number of one type of the guard repeats
+    min_repetition: 1,
+    numberOfOnes: 0, // how many times 1 will repeat 
+    time: 2500,
+    type: "regular",
   };
 
   custom_Settings = {
@@ -106,13 +136,14 @@ export default class App extends React.Component {
     red: 2, // number of red guards in this level
     max_repetition: 4, // max number of one type of the guard repeats
     min_repetition: 1,
+    numberOfOnes: 3, // how many times 1 will repeat 
     time: 2000,
     type: "custom", 
   };
 
 
   state = {
-    level_state: 'login', // Current state of the app: menu = Main Menu 
+    level_state: 'menu', // Current state of the app: menu = Main Menu 
     sleepingPills: 0, // Number of sleeping pills 
     modalVisible: false, // Dialog view visability 
     visibleLost: false, // Lost Dialog view visability 
@@ -140,6 +171,8 @@ export default class App extends React.Component {
     1: this.level1_Settings,
     2: this.level2_Settings,
     3: this.level3_Settings,
+    4: this.level4_Settings,
+    5: this.level5_Settings,
   }
 
 
@@ -235,15 +268,18 @@ export default class App extends React.Component {
       dic[i] = 0;
 
     let temp;
+    
+    let count = 0; 
 
-    while (this.guardsList.length < 10) {
+    while (this.guardsList.length < this.NUMBEROFSTAGES) {
       random = Math.floor(Math.random() * this.numberOfCards);
 
       temp = sprites3[random];
       console.log(temp);
+      // numberOfOnes: 3, // how many times 1 will repeat 
 
       if (dic[temp.number] < level.max_repetition) {
-        if (temp.number == 1 && dic[1] > 2) {
+        if (temp.number == 1 && dic[1] >= level.numberOfOnes) {
         }
         else {
           if (temp.color == 'green' && green != 0) {
@@ -264,7 +300,15 @@ export default class App extends React.Component {
           }
         }
       }
+      count++;
+      if(count > 150){
+        this.setState({ level_state: 'menu' });
+        break; 
+      }
+
+
     }
+
     this.backgroundList = Object.assign([],level.background);
 
     this.setState({ level_state: 'levelOne' });
@@ -305,7 +349,25 @@ export default class App extends React.Component {
         // Hide the content in screen when state object "content" is false.
         this.state.result && !this.state.isListEmpty ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!
 
-        {this._renderButton("Next Stage", () => { this.setState({ level_1: false }); this.setState({ visibleModal: false }); this.setState({ level_state: 'walking' }); this.game.destroyGame() })}
+        {this._renderButton("Next Stage", () => { 
+          this.setState({ level_1: false }); 
+          this.setState({ visibleModal: false, level_state:"loading" });
+          console.log("Changes state to loading");
+          //this.setState({ isLoadingVisible: true  });
+          // this.setState({ level_state: 'loading' }); 
+          // this.setState({ level_state: 'levelOne' }); 
+          
+          setTimeout(() => {
+            console.log("Change State")
+            this.setState({ level_state: "levelOne" }); 
+          }, 100);
+
+   
+          this.game.destroyGame()
+          this.nextStage()
+          })}
+
+          
 
         </Text> : null
 
@@ -319,13 +381,16 @@ export default class App extends React.Component {
         {
           
           this._renderButton("Next Level", () => {
+            this.game.destroyGame()
+            
+            this.setState({ level_state: 'walking' }); 
 
             if(this.state.currentLevel.type == "regular"){
               this.setState({
                 level_1: false,
                 visibleModal: false, 
-                level_state: 'create_list',
-                isLoadingVisible: true,
+                level_state: 'walking',
+                // isLoadingVisible: true,
                 currentLevel: this.levels[(this.state.currentLevel.level + 1)], 
                 win: false, isListEmpty: false }); 
               
@@ -428,11 +493,11 @@ export default class App extends React.Component {
 
     if(!this.game.userLost)
       {
-        this.game.onPressOut(); this.setState({ visibleModal: true }); this.game.isButtonReleased = true;
+      this.setState({ visibleModal: true }); this.game.isButtonReleased = true;
       }
     else{
       this.setState({ visibleCaught: true });
-      this.game.onPressOut(); 
+    
     }
   };
 
@@ -449,7 +514,7 @@ export default class App extends React.Component {
 
   stopWalking = () =>{
     this.setState({ walking: false, isLoadingVisible: false });
-    this.setState({ level_state: 'levelOne' })
+    this.setState({ level_state: 'create_list' })
     this.setState({ result: false });
   }
 
@@ -490,6 +555,7 @@ export default class App extends React.Component {
     console.log("it's working")
     this.setState((state) => ({
       isLoadingVisible: false,
+      level_state: 'levelOne'
     }));
   }
   
@@ -547,6 +613,17 @@ export default class App extends React.Component {
   }
 
 
+  changeGuard = () =>{
+    this.currentGuard = this.guardsList.pop();
+    this.game.changeGuard(this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time);
+  }
+
+  nextStage = () => {
+    this.setState({ isLoadingVisible: true, level_state: 'loading' , result: false  });
+    this.game.toggleLoadingPage();
+    //this.game.
+  } 
+
   levelOne = (
 
     <View>  
@@ -602,7 +679,7 @@ export default class App extends React.Component {
                 this.currentGuard = this.guardsList.pop();
                 //let path = this.backgroundList.pop();
                 console.log("Current Guard: " + this.currentGuard);
-
+                this.setState({ stage: this.guardsList.length });
                 //let bg = require('./assets/' + path);
 
                 this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time);
@@ -627,8 +704,6 @@ export default class App extends React.Component {
       {/* ======================================================================================= */}
 
 
-      
-
       <CircleButton
         onPress={this.onMenuToggle}
         style={{
@@ -649,7 +724,7 @@ export default class App extends React.Component {
     return Component;
   }
 
-  StockChart = this.lazyWithPreload(() => this.levelOne);
+  gameInterface = this.lazyWithPreload(() => this.levelOne);
 
   render() {
 
@@ -725,18 +800,7 @@ export default class App extends React.Component {
         />)}
 
         {this.state.level_state == 'levelOne' &&
-
-          // <AnimatedSplash
-          //   translucent={true}
-          //   isLoaded={this.state.isLoaded}
-          //   logoImage={require("./assets/icons/loading-icon.png")}
-          //   backgroundColor={"#262626"}
-          //   logoHeight={150}
-          //   logoWidth={150}
-          // >            
-          this.StockChart.preload()
-
-          // </AnimatedSplash>
+          this.gameInterface.preload()
         }
 
         {this.state.level_state == 'levelOne' &&(
@@ -771,7 +835,15 @@ export default class App extends React.Component {
             onLongPress={() => {
               this.game.onPress(); console.log("it's been pressed");
             }}
-            onPressOut={() => { this.displayQuestions(); this.toggleBinocular() }}>
+            onPressOut={() => {
+              
+                this.game.onPressOut();
+              if (this.game.binocularState){
+                  this.displayQuestions(); 
+                  this.toggleBinocular();
+                }
+
+              }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
             </View>
           </TouchableOpacity>
