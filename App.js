@@ -29,21 +29,18 @@ export default class App extends React.Component {
 
 
 
-  
-
-
   // Global Variables 
 
   guardsList = [];
   backgroundList = [];
-  numberOfCards = 48;
+  numberOfCards = 49;
   game = null;
   currentGuard;
   gameResult = []; 
   userId = 77777; 
   gameStats = new Map(); 
   NUMBEROFSTAGES = 10;
-
+  numberOfPills = 0; 
 
   // Backgrounds for Level 1 Stages 
   level1_backgrounds = ['background/lvl1.png', 'background/lvl1.png',
@@ -178,50 +175,32 @@ export default class App extends React.Component {
 
   // Funtion to Toggle In Game menu 
   onMenuToggle = () => {
-    console.log("it's working ")
+    //console.log("it's working ")
     this.setState((state) => ({
       isInGameMenuVisible: !this.state.isInGameMenuVisible,
     }));
   };
 
-   entityRef = firebase.firestore().collection('entities');
+  // entityRef = firebase.firestore().collection('entities');
 
   _firebaseTest = () =>{
-    // this.entityRef
-    //   .add("data")
-    //   .then(_doc => {
-    //     setEntityText('')
-    //     Keyboard.dismiss()
-    //   })
-    //   .catch((error) => {
-    //     alert(error)
-    //   });
 
-    firebase.database().ref('users/' + this.userId + '/' + this.gameStats["timeStamp"]).set({
-      id: this.userId,
-      level: this.gameStats["level"],
-      result: this.gameStats["result"],
-      givenTime: this.gameStats["givenTime"],
-      timeSpent: this.gameStats["timeSpent"],
-      numOfguards: this.gameStats["numOfguards"],
-      timeStamp: this.gameStats["timeStamp"],
-    });
+    // firebase.database().ref('users/' + this.userId + '/' + this.gameStats["timeStamp"]).set({
+    //   id: this.userId,
+    //   level: this.gameStats["level"],
+    //   result: this.gameStats["result"],
+    //   givenTime: this.gameStats["givenTime"],
+    //   timeSpent: this.gameStats["timeSpent"],
+    //   numOfguards: this.gameStats["numOfguards"],
+    //   timeStamp: this.gameStats["timeStamp"],
+    // });
 
 
   }
 
   // a function that saves data asyncronously
   _storeData = async () => {
-
-
     try {
-      // await AsyncStorage.setItem('current_level', JSON.stringify(this.state.highestLevel)).then(() => {
-      //   console.log('It was saved successfully')
-      //   // console.log(JSON.stringify(this.state.highestLevel)); 
-      // })
-      //   .catch(() => {
-      //     console.log('There was anerror saving the product')
-      //   });
        await AsyncStorage.setItem('highest_level', this.state.highestLevel);
 
     } catch (error) {
@@ -240,10 +219,10 @@ export default class App extends React.Component {
         //this.setState({ highestLevel: highest_level });
         this.setState({ highestLevel: highest_level })
 
-        console.log(highest_level);
+       // console.log(highest_level);
       }
       else{
-        console.log("null")
+        //console.log("null")
       }
     } catch (error) {
       // Error retrieving data
@@ -258,6 +237,8 @@ export default class App extends React.Component {
     this.backgroundList = [];
     let random;  // returns a random integer from 0 to 10;
 
+    this.numberOfPills = 0; 
+
     let green = level.green;
     let yellow = level.yellow;
     let red = level.red;
@@ -271,13 +252,22 @@ export default class App extends React.Component {
     
     let count = 0; 
 
+    // for(let i = 0; i<1; i++){
+    //   this.guardsList.push(sprites3[i]);
+    // }
+
+  
     while (this.guardsList.length < this.NUMBEROFSTAGES) {
       random = Math.floor(Math.random() * this.numberOfCards);
 
       temp = sprites3[random];
-      console.log(temp);
+      //console.log(temp);
       // numberOfOnes: 3, // how many times 1 will repeat 
 
+      // if(this.guardsList.includes(temp)){
+      //   console.log("repetition");
+      // }
+      // else 
       if (dic[temp.number] < level.max_repetition) {
         if (temp.number == 1 && dic[1] >= level.numberOfOnes) {
         }
@@ -285,17 +275,19 @@ export default class App extends React.Component {
           if (temp.color == 'green' && green != 0) {
             this.guardsList.push(temp)
             dic[temp.number] = dic[temp.number] + 1;
+            this.numberOfPills += temp.number; 
             green--;
           }
           else if (temp.color == 'yellow' && yellow != 0) {
             this.guardsList.push(temp)
             dic[temp.number] = dic[temp.number] + 1;
-
+            this.numberOfPills += temp.number; 
             yellow--;
           }
           else if (temp.color == 'red' && red != 0) {
             this.guardsList.push(sprites3[random])
             dic[temp.number] = dic[temp.number] + 1;
+            this.numberOfPills += temp.number; 
             red--;
           }
         }
@@ -316,10 +308,14 @@ export default class App extends React.Component {
 
   //Function that creates buttons for dialog view. 
   _renderButton = (text, onPress) => (
-    <TouchableOpacity onPress={onPress}>
+    
+     
+    
+    < TouchableOpacity onPress = { onPress}>
       <View style={styles.button}>
         <Text>{text}</Text>
       </View>
+       
     </TouchableOpacity>
   );
 
@@ -352,19 +348,21 @@ export default class App extends React.Component {
         {this._renderButton("Next Stage", () => { 
           this.setState({ level_1: false }); 
           this.setState({ visibleModal: false, level_state:"loading" });
-          console.log("Changes state to loading");
+          //console.log("Changes state to loading");
           //this.setState({ isLoadingVisible: true  });
           // this.setState({ level_state: 'loading' }); 
           // this.setState({ level_state: 'levelOne' }); 
           
           setTimeout(() => {
-            console.log("Change State")
+            //console.log("Change State")
             this.setState({ level_state: "levelOne" }); 
           }, 100);
 
    
           this.game.destroyGame()
+          
           this.nextStage()
+          this.game = undefined; 
           })}
 
           
@@ -396,7 +394,7 @@ export default class App extends React.Component {
               
               }
             else{
-              console.log("ELSEO");
+              //console.log("ELSEO");
               this.game.stopAnimating = true; 
               this.setState({
                 level_1: false, 
@@ -466,6 +464,7 @@ export default class App extends React.Component {
     <View style={styles.modalContent}>
       <Text>That’s not right! Please Try Again! </Text>
       {this._renderButton("Try Again!", () => {
+        this.game.destroyGame(); 
         this.setState({ level_state: 'create_list' }); this.setState({ visibleLost: false });
       })}
     </View>
@@ -478,7 +477,8 @@ export default class App extends React.Component {
       {this._renderButton("Try Again!", () => {
         { this.gameStats["result"] = "Caught" }
         { this.gameResult.push("Caught") }
-        { console.log(this.gameResult) }
+        { console.log(this.gameResult);
+          this.game.destroyGame()}
         { this._firebaseTest() }
         this.setState({ level_state: 'create_list' }); this.setState({ visibleCaught: false });
       })}
@@ -537,14 +537,14 @@ export default class App extends React.Component {
   
 
    toggleBinocular = () => {
-     console.log("it's working")
+     //console.log("it's working")
      this.setState((state) => ({
        isBinocularVisible: !this.state.isBinocularVisible,
      }));
     }
 
   toggleCustomLevel = () => {
-    console.log("it's working")
+    //console.log("it's working")
         this.setState((state) => ({
         level_state: 'custom_level',
     }));
@@ -552,7 +552,7 @@ export default class App extends React.Component {
 
   
   toggleLoadingPage = (state) => {
-    console.log("it's working")
+    //console.log("it's working")
     this.setState((state) => ({
       isLoadingVisible: false,
       level_state: 'levelOne'
@@ -577,7 +577,7 @@ export default class App extends React.Component {
      
     this.setState({ currentLevel: this.custom_Settings, level_state: 'create_list' }); 
 
-    console.log("Custom Level ", levelSettingsCopy);
+   // console.log("Custom Level ", levelSettingsCopy);
   }
 
   selectedLevel = 0;
@@ -600,13 +600,13 @@ export default class App extends React.Component {
   addTimeSpent = (time) =>{
     this.gameResult.push(time);
     this.gameStats["timeSpent"] = time; 
-    console.log("Time spent: " + time ); 
+   // console.log("Time spent: " + time ); 
   }
 
 
   receiveUserId = (userId) =>{
 
-    console.log("User Id: " + userId);
+    //console.log("User Id: " + userId);
     this.setState({level_state: 'menu'}); 
     this.userId = userId; 
 
@@ -638,10 +638,10 @@ export default class App extends React.Component {
               if (this.guardsList.length > 1) {
 
                 this.currentGuard = this.guardsList.pop();
-               // let path = this.backgroundList.pop();
-               // let bg = require('./assets/' + path);
+                // let path = this.backgroundList.pop();
+                // let bg = require('./assets/' + path);
 
-                console.log("Current Guard: " + this.currentGuard.number);
+                //console.log("Current Guard: " + this.currentGuard.number);
               
                 // Adding timestamp 
                 this.gameStats["timeStamp"] = Date.now(); 
@@ -665,9 +665,9 @@ export default class App extends React.Component {
                 this._storeData();
                 this._retrieveData();
 
-                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time);
+                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 4), this.state.currentLevel.time, this.currentGuard.id);
 
-                console.log("guard name", this.currentGuard.name);
+                //console.log("guard name", this.currentGuard.name);
 
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
                 this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
@@ -678,11 +678,11 @@ export default class App extends React.Component {
                 this.setState({ isListEmpty: true })
                 this.currentGuard = this.guardsList.pop();
                 //let path = this.backgroundList.pop();
-                console.log("Current Guard: " + this.currentGuard);
+                //.log("Current Guard: " + this.currentGuard);
                 this.setState({ stage: this.guardsList.length });
                 //let bg = require('./assets/' + path);
 
-                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time);
+                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time, this.currentGuard.id);
 
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
                 this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
@@ -720,7 +720,7 @@ export default class App extends React.Component {
   lazyWithPreload(factory) {
     const Component = React.lazy(factory);
     Component.preload = factory;
-    console.log("preloading");
+    //console.log("preloading");
     return Component;
   }
 
@@ -730,10 +730,16 @@ export default class App extends React.Component {
 
     return (
 
-      <div>
+      <div style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 5,
+        borderColor: '#FF1744'
+        }}>
 
        
-      {console.log("Highest levle: "+this.state.highestLevel)}
+      {/* {console.log("Highest levle: "+this.state.highestLevel)} */}
 
         {this.state.isInGameMenuVisible && (
           <Menu
@@ -833,7 +839,7 @@ export default class App extends React.Component {
               zIndex: 99999
             }}
             onLongPress={() => {
-              this.game.onPress(); console.log("it's been pressed");
+              this.game.onPress(); //console.log("it's been pressed");
             }}
             onPressOut={() => {
               
@@ -861,10 +867,10 @@ export default class App extends React.Component {
             <Card title={"Level " + this.state.currentLevel.level}>
               <Text style={styles.paragraph}>
                 Stage {10 - this.state.stage}/10
-                {console.log(this.guardsList.length)}
+                {/* {console.log(this.guardsList.length)} */}
               </Text>
 
-              <Text>5 X
+              <Text> 5X
               <Image
                   style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
                   source={require('./assets/sleepingSpell.png')}

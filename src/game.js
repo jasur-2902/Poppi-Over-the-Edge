@@ -7,12 +7,14 @@ import {PixelRatio } from 'react-native';
 //import source2 from '../assets/ground2.png';
 //import source3 from '../assets/guards/guards_s.png';
 
-import panda from '../assets/guards/panda_n_updated.png';
-import sloth from '../assets/guards/sloth_n_updated.png';
-import monkey from '../assets/guards/monkey_n_updated.png';
-import pandaCaught from '../assets/guards/panda_caught_updated.png';
-import slothCaught from '../assets/guards/sloth_caught_updated.png';
-import monkeyCaught from '../assets/guards/monkey_caught_updated.png';
+import panda from '../assets/guards/panda_sprite.png';
+import sloth from '../assets/guards/sloth_sprite.png';
+import monkey from '../assets/guards/monkey_sprite.png';
+import macaw from '../assets/guards/macaw_sprite.png';
+import pandaCaught from '../assets/guards/panda_caught.png';
+import slothCaught from '../assets/guards/sloth_caught.png';
+import monkeyCaught from '../assets/guards/monkey_caught.png';
+import macawCaught from '../assets/guards/macaw_caught.png';
 
 
 
@@ -25,7 +27,8 @@ import penguinSource from '../assets/penguin/penguin.png';
 import setupSpriteSheetAsync from './setupSpriteSheetAsync';
 import sprites from './sprites';
 import sprites2 from './Sprites/spriteSheet';
-import sprites3 from './Sprites/guardSheet';
+import guardSheet from './Sprites/guardSheet';
+import guardCoordinates from './Sprites/guardCoordinates';
 import groundSprites from './Sprites/ground';
 import penguinSprites from './Sprites/penguin';
 
@@ -155,10 +158,43 @@ class Guard extends Sprite {
     this.width = Settings.width/2.8;
     this.height = Settings.height/1.5;
 
+
+
     this.position.x = Settings.width/2.9;
 
     this.position.y = Settings.height;
   }
+
+}
+
+// Guard Object
+class NewGuard extends Sprite {
+  ycordinate;
+  constructor(texture, xcor, ycor) {
+    super(texture, Settings.width, Settings.groundHeight);
+    this.scale.set(scale * 2);
+
+    this.ycordinate = ycor; 
+  
+   // console.log("Passing ycor: " + ycor) ;
+
+    this.width = Settings.width / 16;
+    this.height = Settings.height / 10;
+
+    this.position.x = (Settings.width / 2.1 * xcor / 12);
+
+    this.position.y = Settings.height;
+  }
+
+
+  moveUp(){
+    this.position.y = Settings.height / 2.2 * this.ycordinate / 13 
+  }
+
+  moveBack() {
+    this.position.y = Settings.height; 
+  }
+
 }
 
 // Background object
@@ -219,7 +255,11 @@ class Game {
   this_guard;
   this_background;
   guardTextute; 
-  constructor(context, guard, random, time) {
+  guard; 
+  guardList; 
+  child; 
+
+  constructor(context, guard, random, time, id) {
     // Sharp pixels
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -243,8 +283,8 @@ class Game {
     Settings.pipeHorizontalGap = Settings.pipeWidth * 5;
 
     
-
-    this.loadAsync(random);
+    //console.log("IDDDD: " + id);
+    this.loadAsync(random, id);
   }
 
   // Resize function window
@@ -265,51 +305,14 @@ class Game {
     this.guard = null; 
     this. ground = null; 
     this.background = null;
-  }
-
-
-  changeGuard = async(guard, random, time) =>{
+    this.guardList = undefined; 
     
-    this.this_guard = guard;
-
-    Settings.caughtMessageTime = time;
-
-    console.log("Color - " + random);
-    // if (random == 1) {
-    //   this.guardTextute =  await setupSpriteSheetAsync(panda, sprites3);
-    //   this.caughtTexture =  await setupSpriteSheetAsync(pandaCaught, sprites3);
-
-    // }
-    // else if (random == 0) {
-    //   this.guardTextute =  await setupSpriteSheetAsync(sloth, sprites3);
-    //   this.caughtTexture =  await setupSpriteSheetAsync(slothCaught, sprites3);
-    // }
-    // else {
-    //   this.guardTextute =  await setupSpriteSheetAsync(monkey, sprites3);
-    //   this.caughtTexture =  await setupSpriteSheetAsync(monkeyCaught, sprites3);
-    // }
-
-    this.loadAsync(random);
-
-    this.guard = new Guard(this.guardTextute[guard]);
-    
-
-  }
-
-  toggleLoadingPage = () =>{
-    setTimeout(() => {
-      this.loading();
-    }, 300);
-
   }
 
 
   // Async loading textures and backgrounds
-  loadAsync = async (random) => {
+  loadAsync = async (random,id) => {
 
-    
-
-    
 
     //Linking coordinates and background image
     this.textures = await setupSpriteSheetAsync(backgroundImg, sprites);
@@ -321,31 +324,41 @@ class Game {
     this.groundTexture = await setupSpriteSheetAsync(groundSouce, groundSprites);
     this.penguinTexture = await setupSpriteSheetAsync(penguinSource, penguinSprites);
 
-    console.log("Color - " + random);
+    //random = 3
+    //console.log("Color - " + random);
+    
     if(random == 1){
-      this.guardTextute = await setupSpriteSheetAsync(panda, sprites3);
-      this.caughtTexture = await setupSpriteSheetAsync(pandaCaught, sprites3);
+      this.guardTextute = await setupSpriteSheetAsync(panda, guardSheet);
+      this.caughtTexture = await setupSpriteSheetAsync(pandaCaught, guardSheet);
 
     }
     else if(random == 0){
-      this.guardTextute = await setupSpriteSheetAsync(sloth, sprites3);
-      this.caughtTexture = await setupSpriteSheetAsync(slothCaught, sprites3);
+      this.guardTextute = await setupSpriteSheetAsync(sloth, guardSheet);
+      this.caughtTexture = await setupSpriteSheetAsync(slothCaught, guardSheet);
     }
-    else {
-      this.guardTextute = await setupSpriteSheetAsync(monkey, sprites3);
-      this.caughtTexture = await setupSpriteSheetAsync(monkeyCaught, sprites3);
+    else if(random == 2) {
+      this.guardTextute = await setupSpriteSheetAsync(monkey, guardSheet);
+      this.caughtTexture = await setupSpriteSheetAsync(monkeyCaught, guardSheet);
+    }
+    else{
+      this.guardTextute = await setupSpriteSheetAsync(macaw, guardSheet);
+      this.caughtTexture = await setupSpriteSheetAsync(macawCaught, guardSheet);
     }
 
 
     
-    this.onAssetsLoaded();
+
+    this.onAssetsLoaded(id);
+
+
     setTimeout(() => {
-      console.log("Togle Loading Page in game js");
+      //console.log("Togle Loading Page in game js");
       this.loading();
     }, 400);
   };
+  
 
-  onAssetsLoaded = () => {
+  onAssetsLoaded = (id) => {
 
     // Creating background
     this.background = new Background(this.textures.background);
@@ -382,24 +395,144 @@ class Game {
 
    // this.guard = new Guard(this.guardTextute.guard10);
 
-    this.guard = new Guard(this.guardTextute[this.this_guard]);
+    //this.guard = new Guard(this.guardTextute[this.this_guard]);
+
+
 
 
     // Adding objects to the screen
-    [this.background, this.guard, this.caughtMessage, this.ground2 , this.bird].map(child =>
-      this.app.stage.addChild(child),
-    ); 
+    // [this.guard, this.caughtMessage, this.ground2 , this.bird].map(child =>
+    //   this.app.stage.addChild(child),
+    // ); 
+
+    // Adding objects to the screen
+    this.child = [this.background, this.caughtMessage, this.ground2, this.bird];
+
+    let guardCombination = guardCoordinates[1]; 
+
+    for(let i = 0; i<guardCoordinates.length;i++){
+      
+      if(guardCoordinates[i].name == this.this_guard){
+         guardCombination = guardCoordinates[i];
+         //console.log(guardCombination);
+         //console.log("WE FOUUNDDDD");
+         break; 
+      }
+    }
+
+    this.createGuards(guardCombination)
+
+    this.child.map(child2 => this.app.stage.addChild(child2));
+     //this.app.stage.addChild(child)
+
+
+
+    //this.app.stage.addChild(this.background, this.ground2); 
+
+   
 
 
     this.stopAnimating = false;
   };
+  
+
+  createGuards = (guardCombination) => {
+    this.guardList = new Array();
+    //console.log(guardCombination)
+
+    for (let i = 0; i < guardCombination.number; i++) {
+      let temp_guard = new NewGuard(this.guardTextute[this.this_guard], guardCombination.location[i][0], guardCombination.location[i][1]);
+      //console.log("Guard was Created")
+      // console.log(guardCombination.location[i][1],guardCombination.location[i][0]);
+      // console.log()
+      //   console.log(temp_guard)
+      this.guardList.push(temp_guard);
+      this.child.push(temp_guard);
+    }
+  }
+
+
+  changeGuard = async(guard, random, time) =>{
+    
+    this.this_guard = guard;
+
+    Settings.caughtMessageTime = time;
+
+    console.log("Color - " + random);
+    // if (random == 1) {
+    //   this.guardTextute =  await setupSpriteSheetAsync(panda, sprites3);
+    //   this.caughtTexture =  await setupSpriteSheetAsync(pandaCaught, sprites3);
+
+    // }
+    // else if (random == 0) {
+    //   this.guardTextute =  await setupSpriteSheetAsync(sloth, sprites3);
+    //   this.caughtTexture =  await setupSpriteSheetAsync(slothCaught, sprites3);
+    // }
+    // else {
+    //   this.guardTextute =  await setupSpriteSheetAsync(monkey, sprites3);
+    //   this.caughtTexture =  await setupSpriteSheetAsync(monkeyCaught, sprites3);
+    // }
+
+    //this.loadAsync(random);
+
+    this.guard = new Guard(this.guardTextute[guard]);
+
+  }
+
+
+
+  toggleLoadingPage = () =>{
+    setTimeout(() => {
+      this.loading();
+    }, 300);
+
+  }
+
+ 
+
+
+  // changeGuard = async (guard, random, time) => {
+
+  //   this.this_guard = guard;
+
+  //   Settings.caughtMessageTime = time;
+
+  //   console.log("Color - " + random);
+  //   // if (random == 1) {
+  //   //   this.guardTextute =  await setupSpriteSheetAsync(panda, sprites3);
+  //   //   this.caughtTexture =  await setupSpriteSheetAsync(pandaCaught, sprites3);
+
+  //   // }
+  //   // else if (random == 0) {
+  //   //   this.guardTextute =  await setupSpriteSheetAsync(sloth, sprites3);
+  //   //   this.caughtTexture =  await setupSpriteSheetAsync(slothCaught, sprites3);
+  //   // }
+  //   // else {
+  //   //   this.guardTextute =  await setupSpriteSheetAsync(monkey, sprites3);
+  //   //   this.caughtTexture =  await setupSpriteSheetAsync(monkeyCaught, sprites3);
+  //   // }
+
+  //   this.loadAsync(random);
+
+  //   this.guard = new Guard(this.guardTextute[guard]);
+
+  // }
+
+
+
+  // toggleLoadingPage = () => {
+  //   setTimeout(() => {
+  //     this.loading();
+  //   }, 300);
+
+  // }
 
 
   // This functions starts when the button is clicked
   onPress = () => {
 
-    this.guard.buttonIsPressed = true;
-    this.guard.backward = true;
+    // this.guard.buttonIsPressed = true;
+    // this.guard.backward = true;
 
     this.bird.animationSpeed = 0.053;
 
@@ -419,14 +552,14 @@ class Game {
   onPressOut = () =>{
 
     if (this.binocularState){
-      console.log("Button released on time");
+      //console.log("Button released on time");
       this.moveBack();
       this.ground2.moveGround = false;
       this.bird.animationSpeed = 0;
 
     }
     else{
-      console.log("Button released late");
+      //console.log("Button released late");
       this.bird.animationSpeed = 0;
       this.isStarted = false;
       this.ground2.position.y = Settings.groundPositionY;
@@ -486,7 +619,13 @@ class Game {
         setTimeout(() => {
 
           //Moving guards to top making them visible
-          this.guard.position.y = guardsUpLevel;
+           // this.guard.position.y = guardsUpLevel;
+          // this.guardList[1].position.y = Settings.height / 6;
+          // console.log(this.guardList[1].position.y);
+          
+          for (let i = 0; i < this.guardList.length; i++){
+            this.guardList[i].moveUp(); 
+          }
 
           // Stopping bird moving
           this.bird.animationSpeed = 0.00;
@@ -528,7 +667,11 @@ class Game {
       //this.caughtMessage.position.y = Settings.height * 0.3;
       this.userLost = true;
 
-      this.guard.texture = this.caughtTexture[this.this_guard]; 
+//      this.guard.texture = this.caughtTexture[this.this_guard]; 
+
+      for (let i = 0; i < this.guardList.length; i++) {
+        this.guardList[i].texture = this.caughtTexture[this.this_guard];
+      }
 
       let end = new Date();
       
@@ -549,6 +692,10 @@ class Game {
     //this.bird.position.y = Settings.height/1.2;
 
     let end = new Date (); 
+
+    for (let i = 0; i < this.guardList.length; i++) {
+      this.guardList[i].moveBack();
+    }
 
     //Counting time elapsed 
     let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000); 
