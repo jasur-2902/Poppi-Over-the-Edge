@@ -21,6 +21,7 @@ import macawCaught from '../assets/guards/macaw_caught.png';
 //import caught_message from '../assets/guards/caught_s.png';
 import groundSouce from '../assets/ground/lvl1_s.png';
 import penguinSource from '../assets/penguin/penguin.png';
+import pills from '../assets/SleepingPills/pills.png';
 
 
 // Importing sprites
@@ -28,11 +29,16 @@ import setupSpriteSheetAsync from './setupSpriteSheetAsync';
 import sprites from './sprites';
 import sprites2 from './Sprites/spriteSheet';
 import guardSheet from './Sprites/guardSheet';
+import sleepingPills from './Sprites/sleepingPillsSprite';
+
 import guardCoordinates from './Sprites/guardCoordinates';
 import groundSprites from './Sprites/ground';
 import penguinSprites from './Sprites/penguin';
 
 import backgroundImg from '../assets/background/lvl1_s.png';
+import sleepingSpellObj from '../assets/sleepingSpell.png';
+import { Logs } from 'expo';
+
 
 
 const {AnimatedSprite } = extras;
@@ -147,6 +153,7 @@ class CaughtMessage extends Sprite {
   }
 }
 
+
 // Guard Object
 class Guard extends Sprite {
 
@@ -239,6 +246,101 @@ class Bird extends AnimatedSprite {
 
 }
 
+
+
+
+// Sleeping Pill
+class SleepingPill extends AnimatedSprite {
+
+  constructor(texture, x, y) {
+    super(texture);
+    this.scale.set(scale * 2);
+
+    this.animationSpeed = 0.15;
+
+    this.width = Settings.width / 24;
+    this.height = Settings.height / 18;
+
+
+    this.speedY = Settings.playerFallSpeed;
+    this.rate = Settings.playerGravity;
+
+    this.position.x = Settings.width / x;
+    this.position.y = Settings.height / y;
+
+    // this.position.x = Settings.width / 3;
+    // this.position.y = Settings.height / 2;
+
+    this.play();
+  }
+
+  move = (targetPositionX, targetPositionY , sleepingPillTexture, hideBinoculus) =>{
+    //while(this.position.x < targetPosition){
+      let inter = setInterval(() => {
+        if (this.position.x < targetPositionX && this.position.y > targetPositionY){
+            this.position.x = this.position.x + 10; 
+            this.position.y = this.position.y - 10; 
+        }
+        else if (this.position.x < targetPositionX+5)
+          this.position.x = this.position.x + 15; 
+
+        else if (this.position.y > targetPositionY-5){
+          this.position.y = this.position.y - 15; 
+        }
+        else{
+          this.animationSpeed = 0.1;
+
+          // this.width = this.width *1.2; 
+          // this.height = this.height *1.2; 
+
+          this._textures = [
+            sleepingPillTexture['splash1'],
+            sleepingPillTexture['splash2'],
+            sleepingPillTexture['splash3'],
+            sleepingPillTexture['splash4'],
+            sleepingPillTexture['splash5'],
+            sleepingPillTexture['splash6'],
+            sleepingPillTexture['splash7'],
+            sleepingPillTexture['splash8'],
+            sleepingPillTexture['splash9'],
+            sleepingPillTexture['splash10'],
+
+          ]
+
+          this.onFrameChange = function () {
+
+            if(this.currentFrame == 9){
+              console.log("Stopppp")
+              clearInterval(inter); 
+              this.destroy();
+
+              setTimeout(() => {
+                hideBinoculus();
+              }, 300);
+              
+            }
+          };
+         //
+        }
+      }, 70);
+
+
+    
+
+    //}
+   // this.position.x = this.position.x + 30; 
+  }
+
+  restart = () => {
+    this.play();
+    this.rotation = 0;
+    this.position.x = Settings.width / 2;
+    this.position.y = Settings.height / 1.30;
+  };
+}
+
+
+
 let bird;
 
 class Game {
@@ -258,6 +360,8 @@ class Game {
   guard; 
   guardList; 
   child; 
+  sleepingPill; 
+  sleepingPillTexture;
 
   constructor(context, guard, random, time, id) {
     // Sharp pixels
@@ -287,6 +391,7 @@ class Game {
     this.loadAsync(random, id);
   }
 
+
   // Resize function window
   resize = ({ width, height, scale }) => {
     const parent = this.app.view.parentNode;
@@ -306,7 +411,70 @@ class Game {
     this. ground = null; 
     this.background = null;
     this.guardList = undefined; 
+    this.sleepingPill = null; 
     
+  }
+
+  throwSleepingPills = (numOfPills) =>{
+    
+    this.numOfPills = numOfPills; 
+
+    console.log("SleepingPills" + numOfPills)
+    let texture = [
+      this.sleepingPillTexture['pill1'],
+      this.sleepingPillTexture['pill2'],
+      this.sleepingPillTexture['pill3'],
+      this.sleepingPillTexture['pill4'],
+      this.sleepingPillTexture['pill5'],
+      this.sleepingPillTexture['pill6'],
+      this.sleepingPillTexture['pill7'],
+      this.sleepingPillTexture['pill8'],
+    ]
+    //this.sleepingPill = new SleepingPill(texture);
+
+    //this.sleepingPill = new SleepingPill(this.sleepingPillTexture.sleepingPills);
+
+    // this.child.push(this.sleepingPill);
+
+    let pills = []; 
+    for(let i =0 ; i < numOfPills; i++){
+      pills.push(new SleepingPill(texture,3,1.5));
+    }
+
+    for (let x = 0; x < pills.length; x++){
+      this.child.push(pills[x]); 
+    }
+
+
+    for(let s = 0; s<pills.length; s++){
+
+      pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+
+    }
+
+
+    //this.sleepingPill.move(this.guardList[0].position.x, this.sleepingPillTexture);
+
+    this.child.map(child2 => this.app.stage.addChild(child2));
+
+
+
+  }
+  
+  numOfPills; 
+
+  hideBinoculus = () => {
+
+    this.numOfPills--; 
+
+    if(this.numOfPills == 0) {
+
+      console.log("do something"); 
+      this.onScore(this.binocularState);
+      this.moveBack();
+
+    }
+
   }
 
 
@@ -324,6 +492,7 @@ class Game {
     this.groundTexture = await setupSpriteSheetAsync(groundSouce, groundSprites);
     this.penguinTexture = await setupSpriteSheetAsync(penguinSource, penguinSprites);
 
+    this.sleepingPillTexture = await setupSpriteSheetAsync(pills,sleepingPills);
     //random = 3
     //console.log("Color - " + random);
     
@@ -553,17 +722,17 @@ class Game {
 
     if (this.binocularState){
       //console.log("Button released on time");
-      this.moveBack();
-      this.ground2.moveGround = false;
+      //this.moveBack();
+      //this.ground2.moveGround = false;
       this.bird.animationSpeed = 0;
 
     }
     else{
       //console.log("Button released late");
       this.bird.animationSpeed = 0;
-      this.isStarted = false;
-      this.ground2.position.y = Settings.groundPositionY;
-      this.edge.position.y = Settings.secondCloudPositionY;
+      //this.isStarted = false;
+      //this.ground2.position.y = Settings.groundPositionY;
+      //this.edge.position.y = Settings.secondCloudPositionY;
       this.bird.restart(); 
       
     }
@@ -676,19 +845,19 @@ class Game {
       let end = new Date();
       
 
-      //Counting time elapsed 
-      let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000);
-      this.timeSpent(time);
+      // //Counting time elapsed 
+      // let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000);
+      // this.timeSpent(time);
 
     }
     else { // Some debugging
-      this.ground2.position.y = Settings.groundPositionY;
+     // this.ground2.position.y = Settings.groundPositionY;
     }
   }
 
   moveBack() {
-    this.ground2.position.y = Settings.groundPositionY;
-    this.edge.position.y = Settings.secondCloudPositionY;
+  //  this.ground2.position.y = Settings.groundPositionY;
+   // this.edge.position.y = Settings.secondCloudPositionY;
     //this.bird.position.y = Settings.height/1.2;
 
     let end = new Date (); 
@@ -697,12 +866,12 @@ class Game {
       this.guardList[i].moveBack();
     }
 
-    //Counting time elapsed 
-    let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000); 
-    this.timeSpent(time);
+    // //Counting time elapsed 
+    // let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000); 
+    // this.timeSpent(time);
 
     //console.log("Time spent: " + time ); 
-
+    this.ground2.position.y = Settings.groundPositionY;
     this.bird.restart(); 
   };
 

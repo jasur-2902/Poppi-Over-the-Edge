@@ -434,14 +434,38 @@ export default class App extends React.Component {
 
 
  checkForResult(userChoice){
+    this.game.throwSleepingPills(userChoice); 
+    this.setState({ visibleModal: null });
+    // if(userChoice == this.currentGuard.number){
 
-    if(userChoice == this.currentGuard.number){
+    //   { this.gameResult.push("Correct") }
+    //   { this.gameStats["result"] = "Correct"}
+    //   // { console.log(this.gameResult) }
+    //   // { console.log(this.gameStats) }
+    //   // { console.log(this.gameStats['level']) }
+    //   { this._firebaseTest()}
+    //   if(!this.state.isListEmpty)
+    //     !this.setState({ result: true });
+    //   else
+    //     this.setState({win: true});
+    // }
+    // else{
+    //   { this.gameResult.push("Incorrect") }
+    //   { this.gameStats["result"] = "Incorrect" }
+    //   { this._firebaseTest() }
+    //   // { console.log(this.gameResult) }
+    //   this.setState({ visibleModal: null });
+    //   this.setState({visibleLost: true });
 
+    // }
+
+ }
+
+  checkForResult(option) {
+    
+    if(option == "correct"){
       { this.gameResult.push("Correct") }
       { this.gameStats["result"] = "Correct"}
-      // { console.log(this.gameResult) }
-      // { console.log(this.gameStats) }
-      // { console.log(this.gameStats['level']) }
       { this._firebaseTest()}
       if(!this.state.isListEmpty)
         !this.setState({ result: true });
@@ -458,7 +482,8 @@ export default class App extends React.Component {
 
     }
 
- }
+  }
+
 
   _renderModalLost = () => (
     <View style={styles.modalContent}>
@@ -669,6 +694,7 @@ export default class App extends React.Component {
 
                 //console.log("guard name", this.currentGuard.name);
 
+                this.game.showOption = option => this.showOptions(option); 
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
                 this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
                 this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
@@ -846,7 +872,7 @@ export default class App extends React.Component {
                 this.game.onPressOut();
               if (this.game.binocularState){
                   this.displayQuestions(); 
-                  this.toggleBinocular();
+                 // this.toggleBinocular();
                 }
 
               }}>
