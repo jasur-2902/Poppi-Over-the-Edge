@@ -307,6 +307,8 @@ class SleepingPill extends AnimatedSprite {
 
           ]
 
+          // this.gotoAndPlay([1,2,3,4,5,6,7,8,9]); 
+
           this.onFrameChange = function () {
 
             if(this.currentFrame == 9){
@@ -418,6 +420,9 @@ class Game {
   throwSleepingPills = (numOfPills) =>{
     
     this.numOfPills = numOfPills; 
+    this.numOfPills2 = numOfPills; 
+    
+    let glsize = this.guardList.length; // guardlist leanght 
 
     console.log("SleepingPills" + numOfPills)
     let texture = [
@@ -446,12 +451,28 @@ class Game {
     }
 
 
-    for(let s = 0; s<pills.length; s++){
+    if (numOfPills == glsize){
+      for(let s = 0; s<pills.length; s++){
+        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+      }
+    }
+    else if (numOfPills > glsize){
+      let rem = numOfPills - glsize; 
+      for (let s = 0; s < glsize; s++) {
+        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+      }
 
-      pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+      for (let s = glsize; s < glsize+rem; s++) { // add random coordinate to throw the extra 
+        let ran = Math.floor(Math.random() * 10) + 3;
+        pills[s].move(this.guardList[0].position.x + 10 * ran, this.guardList[0].position.y - 10 * ran, this.sleepingPillTexture, this.hideBinoculus);
+      }
 
     }
-
+    else{
+      for (let s = 0; s < numOfPills; s++) {
+        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+      }
+    }
 
     //this.sleepingPill.move(this.guardList[0].position.x, this.sleepingPillTexture);
 
@@ -461,22 +482,33 @@ class Game {
 
   }
   
-  numOfPills; 
+  numOfPills;
+  numOfPills2;  
 
   hideBinoculus = () => {
 
-    this.numOfPills--; 
+    this.numOfPills2--; 
 
-    if(this.numOfPills == 0) {
+    if(this.numOfPills2 == 0) {
 
       console.log("do something"); 
-      this.onScore(this.binocularState);
-      this.moveBack();
+      if (this.numOfPills < this.guardList.length) {
+        this.showOptions("lose")
+      }
+      else {
+        this.showOptions("next")
+        this.onScore(this.binocularState);
+        this.moveBack();
+      }
 
     }
 
   }
 
+  // showOptions = () =>{
+
+    
+  // }
 
   // Async loading textures and backgrounds
   loadAsync = async (random,id) => {
@@ -719,7 +751,6 @@ class Game {
 
   //Function which will run once user releases the button
   onPressOut = () =>{
-
     if (this.binocularState){
       //console.log("Button released on time");
       //this.moveBack();
@@ -814,6 +845,7 @@ class Game {
         //TODO Make 2500 global, this is time after which lose message will be displayed
         setTimeout(() => {
           this.loseMessage();
+          //this.onScore(this.binocularState)
         }, Settings.caughtMessageTime);
 
 
@@ -835,22 +867,19 @@ class Game {
       //console.log("Lose Message!");
       //this.caughtMessage.position.y = Settings.height * 0.3;
       this.userLost = true;
-
 //      this.guard.texture = this.caughtTexture[this.this_guard]; 
-
       for (let i = 0; i < this.guardList.length; i++) {
         this.guardList[i].texture = this.caughtTexture[this.this_guard];
       }
 
       let end = new Date();
-      
-
       // //Counting time elapsed 
       // let time = (end.getHours() * 3600 + end.getMinutes() * 60 + end.getSeconds() + end.getMilliseconds() / 1000) - (this.beginning.getHours() * 3600 + this.beginning.getMinutes() * 60 + this.beginning.getSeconds() + this.beginning.getMilliseconds() / 1000);
       // this.timeSpent(time);
 
     }
     else { // Some debugging
+      //this.onScore(this.binocularState)
      // this.ground2.position.y = Settings.groundPositionY;
     }
   }

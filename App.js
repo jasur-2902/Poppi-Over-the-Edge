@@ -146,6 +146,7 @@ export default class App extends React.Component {
     visibleLost: false, // Lost Dialog view visability 
     visibleCaught: false, // Caught Dialog view visability 
     result: false, 
+    showOptions: false,
     level_1: true,
     walking: true,
     win: false,
@@ -229,9 +230,11 @@ export default class App extends React.Component {
     }
   }
 
-
   // Functions that creates guardList for the given level 
   createGuardList(level){
+
+    this.setState({isBinocularVisible: false}); 
+
 
     this.guardsList = []
     this.backgroundList = [];
@@ -293,7 +296,7 @@ export default class App extends React.Component {
         }
       }
       count++;
-      if(count > 150){
+      if(count > 250){
         this.setState({ level_state: 'menu' });
         break; 
       }
@@ -422,6 +425,42 @@ export default class App extends React.Component {
     </View>
   );
 
+  _renderModalNext= () => (
+    <View isLost={false} style={styles.modalContent}>
+
+      {
+        // Display the content in screen when state object "content" is true.
+        // Hide the content in screen when state object "content" is false.
+        this.state.showOptions ?  <Text style={styles.headerText}> {"\n"}
+
+        {this._renderButton("Next Stage", () => {
+          this.setState({ level_1: false });
+          this.setState({ visibleModal: false, level_state: "loading" , showOptions:false});
+          //console.log("Changes state to loading");
+          //this.setState({ isLoadingVisible: true  });
+          // this.setState({ level_state: 'loading' }); 
+          // this.setState({ level_state: 'levelOne' }); 
+        
+          setTimeout(() => {
+            //console.log("Change State")
+            this.setState({ level_state: "levelOne" });
+          }, 100);
+
+
+          this.game.destroyGame()
+
+          this.nextStage()
+          this.game = undefined;
+        })}
+
+
+
+        </Text> : null
+
+      }
+    </View>
+  );
+
 
   onPressLevelSelection = (selectedLevel) => {
 
@@ -435,6 +474,7 @@ export default class App extends React.Component {
 
  checkForResult(userChoice){
     this.game.throwSleepingPills(userChoice); 
+    this.numberOfPills = this.numberOfPills - userChoice; 
     this.setState({ visibleModal: null });
     // if(userChoice == this.currentGuard.number){
 
@@ -461,23 +501,26 @@ export default class App extends React.Component {
 
  }
 
-  checkForResult(option) {
+  showOptions(option) {
     
-    if(option == "correct"){
+    if(option == "next"){
       { this.gameResult.push("Correct") }
       { this.gameStats["result"] = "Correct"}
-      { this._firebaseTest()}
-      if(!this.state.isListEmpty)
-        !this.setState({ result: true });
+      //{ this._firebaseTest()}
+      //this.setState({ visibleModal: false, level_state: "loading" });
+      if(!this.state.isListEmpty){
+        console.log(option);
+        this.setState({showOptions: true});
+
+      }
       else
         this.setState({win: true});
     }
     else{
       { this.gameResult.push("Incorrect") }
       { this.gameStats["result"] = "Incorrect" }
-      { this._firebaseTest() }
-      // { console.log(this.gameResult) }
-      this.setState({ visibleModal: null });
+      //{ this._firebaseTest() }
+
       this.setState({visibleLost: true });
 
     }
@@ -487,10 +530,12 @@ export default class App extends React.Component {
 
   _renderModalLost = () => (
     <View style={styles.modalContent}>
-      <Text>That’s not right! Please Try Again! </Text>
+      <Text>Guards Caught You, Please Try Again! </Text>
       {this._renderButton("Try Again!", () => {
+
+        this.toggleBinocular(); 
         this.game.destroyGame(); 
-        this.setState({ level_state: 'create_list' }); this.setState({ visibleLost: false });
+        this.setState({ level_state: 'create_list', isBinocularVisible: !this.state.isBinocularVisible }); this.setState({ visibleLost: false });
       })}
     </View>
   );
@@ -694,7 +739,7 @@ export default class App extends React.Component {
 
                 //console.log("guard name", this.currentGuard.name);
 
-                this.game.showOption = option => this.showOptions(option); 
+                this.game.showOptions = option => this.showOptions(option); 
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
                 this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
                 this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
@@ -787,6 +832,11 @@ export default class App extends React.Component {
         <Modal isVisible={this.state.visibleCaught}>
           {this._renderModalCaught()}
         </Modal>
+
+        <Modal isVisible={this.state.showOptions}>
+          {this._renderModalNext()}
+        </Modal>
+
 
         {this.state.level_state == 'menu' && !this.state.isLevelsMenuVisible && (
             <MainMenu
@@ -896,7 +946,7 @@ export default class App extends React.Component {
                 {/* {console.log(this.guardsList.length)} */}
               </Text>
 
-              <Text> 5X
+              <Text> {this.numberOfPills} X
               <Image
                   style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
                   source={require('./assets/sleepingSpell.png')}
