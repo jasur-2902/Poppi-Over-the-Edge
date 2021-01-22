@@ -11,11 +11,18 @@ import panda from '../assets/guards/panda_sprite.png';
 import sloth from '../assets/guards/sloth_sprite.png';
 import monkey from '../assets/guards/monkey_sprite.png';
 import macaw from '../assets/guards/macaw_sprite.png';
-import pandaCaught from '../assets/guards/panda_caught.png';
-import slothCaught from '../assets/guards/sloth_caught.png';
-import monkeyCaught from '../assets/guards/monkey_caught.png';
-import macawCaught from '../assets/guards/macaw_caught.png';
 
+import pandaCaught from '../assets/guards/panda_caught.png';
+import pandaSleeping from '../assets/guards/panda_sleeping.png';
+
+import slothCaught from '../assets/guards/sloth_caught.png';
+import slothSleeping from '../assets/guards/sloth_sleeping.png';
+
+import monkeyCaught from '../assets/guards/monkey_caught.png';
+import monkeySleeping from '../assets/guards/monkey_sleeping.png';
+
+import macawCaught from '../assets/guards/macaw_caught.png';
+import macawSleeping from '../assets/guards/macaw_sleeping.png';
 
 
 //import caught_message from '../assets/guards/caught_s.png';
@@ -29,6 +36,9 @@ import setupSpriteSheetAsync from './setupSpriteSheetAsync';
 import sprites from './sprites';
 import sprites2 from './Sprites/spriteSheet';
 import guardSheet from './Sprites/guardSheet';
+
+import sleepingGuard from './Sprites/sleepingGuard';
+
 import sleepingPills from './Sprites/sleepingPillsSprite';
 
 import guardCoordinates from './Sprites/guardCoordinates';
@@ -155,7 +165,7 @@ class CaughtMessage extends Sprite {
 
 
 // Guard Object
-class Guard extends Sprite {
+class Guard extends AnimatedSprite {
 
   constructor(texture) {
     super(texture, Settings.width, Settings.groundHeight);
@@ -175,10 +185,10 @@ class Guard extends Sprite {
 }
 
 // Guard Object
-class NewGuard extends Sprite {
+class NewGuard extends AnimatedSprite {
   ycordinate;
   constructor(texture, xcor, ycor) {
-    super(texture, Settings.width, Settings.groundHeight);
+    super([texture]);
     this.scale.set(scale * 2);
 
     this.ycordinate = ycor; 
@@ -191,6 +201,13 @@ class NewGuard extends Sprite {
     this.position.x = (Settings.width / 2.1 * xcor / 12);
 
     this.position.y = Settings.height;
+
+    this.animationSpeed = 0.15;
+
+    this.speedY = Settings.playerFallSpeed;
+    this.rate = Settings.playerGravity;
+
+    this.play();
   }
 
 
@@ -252,21 +269,21 @@ class Bird extends AnimatedSprite {
 // Sleeping Pill
 class SleepingPill extends AnimatedSprite {
 
-  constructor(texture, x, y) {
+  constructor(texture, x, y, margin) {
     super(texture);
     this.scale.set(scale * 2);
 
     this.animationSpeed = 0.15;
 
-    this.width = Settings.width / 24;
-    this.height = Settings.height / 18;
+    this.width = Settings.width / 30;
+    this.height = Settings.height / 23;
 
 
     this.speedY = Settings.playerFallSpeed;
     this.rate = Settings.playerGravity;
 
-    this.position.x = Settings.width / x;
-    this.position.y = Settings.height / y;
+    this.position.x = Settings.width / 6 + margin;
+    this.position.y = Settings.height - margin;
 
     // this.position.x = Settings.width / 3;
     // this.position.y = Settings.height / 2;
@@ -274,12 +291,24 @@ class SleepingPill extends AnimatedSprite {
     this.play();
   }
 
-  move = (targetPositionX, targetPositionY , sleepingPillTexture, hideBinoculus) =>{
+  move = (targetPositionX, targetPositionY , sleepingPillTexture, hideBinoculus, guard, sleepingTexture) =>{
     //while(this.position.x < targetPosition){
+
+      let speed = 8; 
+      
+      //let deltaX = this.position.x + targetPositionX ; 
+      //let deltaY = this.position.y + targetPositionY; 
+
+      let deltaX = - this.position.x + targetPositionX;
+      let deltaY = - this.position.y + targetPositionY; 
+
+      let sloap = Math.atan2(deltaY,deltaX);
+      //let sloap = deltaY/deltaX; 
+
       let inter = setInterval(() => {
         if (this.position.x < targetPositionX && this.position.y > targetPositionY){
-            this.position.x = this.position.x + 10; 
-            this.position.y = this.position.y - 10; 
+            this.position.x = this.position.x + speed * Math.cos(sloap); 
+            this.position.y = this.position.y + speed * Math.sin(sloap); 
         }
         else if (this.position.x < targetPositionX+5)
           this.position.x = this.position.x + 15; 
@@ -288,7 +317,7 @@ class SleepingPill extends AnimatedSprite {
           this.position.y = this.position.y - 15; 
         }
         else{
-          this.animationSpeed = 0.1;
+          this.animationSpeed = 0.07;
 
           // this.width = this.width *1.2; 
           // this.height = this.height *1.2; 
@@ -313,12 +342,48 @@ class SleepingPill extends AnimatedSprite {
 
             if(this.currentFrame == 9){
               console.log("Stopppp")
+              if(guard != null && sleepingTexture != null){
+                guard.animationSpeed = 0.05;
+                guard.textures = [
+                  sleepingTexture['sleeping2'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                  sleepingTexture['sleeping3'],
+                ] 
+                guard.play();
+              }
+              // if(guard.currentFrame == 1)
+              //    guard.animationSpeed = 0.00;
+            
+              
+              // guard.textures = [
+              //   sleepingPillTexture['splash1'],
+              //   sleepingPillTexture['splash2'],
+              //   sleepingPillTexture['splash3'],
+              //   sleepingPillTexture['splash4'],
+              //   sleepingPillTexture['splash5'],
+              //   sleepingPillTexture['splash6'],
+              //   sleepingPillTexture['splash7'],
+              //   sleepingPillTexture['splash8'],
+              //   sleepingPillTexture['splash9'],
+              //   sleepingPillTexture['splash10'],
+
+              // ]
+
               clearInterval(inter); 
               this.destroy();
 
               setTimeout(() => {
+                if(guard != null){
+                  guard.animationSpeed = 0.00;
+                }
                 hideBinoculus();
-              }, 300);
+              }, 1500);
               
             }
           };
@@ -355,7 +420,8 @@ class Game {
   isButtonReleased = false;
   userLost = false;
   time; 
-  caughtTexture; 
+  caughtTexture;
+  panadaSleepingTexture;  
   this_guard;
   this_background;
   guardTextute; 
@@ -442,39 +508,53 @@ class Game {
     // this.child.push(this.sleepingPill);
 
     let pills = []; 
+    let margin = 0; 
     for(let i =0 ; i < numOfPills; i++){
-      pills.push(new SleepingPill(texture,3,1.5));
+      pills.push(new SleepingPill(texture,3,1.5, margin));
+      margin += 50; 
     }
 
     for (let x = 0; x < pills.length; x++){
       this.child.push(pills[x]); 
     }
 
-
+    
     if (numOfPills == glsize){
       for(let s = 0; s<pills.length; s++){
-        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+        // this.guardList[s].textures = [
+        //   this.panadaSleepingTextures['sleeping2'],
+        //   this.panadaSleepingTextures['sleeping3'],
+        // ];
+        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus, this.guardList[s], this.panadaSleepingTexture);
+        //this.guardList[s].texture = this.panadaSleepingTexture[this.this_guard];
       }
     }
+
     else if (numOfPills > glsize){
       let rem = numOfPills - glsize; 
       for (let s = 0; s < glsize; s++) {
-        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus, this.guardList[s], this.panadaSleepingTexture);
       }
 
       for (let s = glsize; s < glsize+rem; s++) { // add random coordinate to throw the extra 
-        let ran = Math.floor(Math.random() * 10) + 3;
-        pills[s].move(this.guardList[0].position.x + 10 * ran, this.guardList[0].position.y - 10 * ran, this.sleepingPillTexture, this.hideBinoculus);
+        let ran = Math.ceil(Math.random() * 20) * (Math.round(Math.random()) ? 1 : -1); 
+        console.log("Random cor:" + ran); 
+        pills[s].move(this.guardList[0].position.x + 15 * ran, this.guardList[0].position.y - 15 * ran, this.sleepingPillTexture, this.hideBinoculus, null, this.panadaSleepingTexture);
       }
 
     }
     else{
       for (let s = 0; s < numOfPills; s++) {
-        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus);
+        pills[s].move(this.guardList[s].position.x, this.guardList[s].position.y, this.sleepingPillTexture, this.hideBinoculus, this.guardList[s], this.panadaSleepingTexture);
       }
+      setTimeout(() => {
+        for (let s = numOfPills; s < glsize; s++) {
+          this.guardList[s].texture = this.caughtTexture[this.this_guard];
+        }
+      }, 1300);
+      
     }
 
-    //this.sleepingPill.move(this.guardList[0].position.x, this.sleepingPillTexture);
 
     this.child.map(child2 => this.app.stage.addChild(child2));
 
@@ -525,25 +605,31 @@ class Game {
     this.penguinTexture = await setupSpriteSheetAsync(penguinSource, penguinSprites);
 
     this.sleepingPillTexture = await setupSpriteSheetAsync(pills,sleepingPills);
-    //random = 3
+    //random = 0;
     //console.log("Color - " + random);
-    
+
     if(random == 1){
       this.guardTextute = await setupSpriteSheetAsync(panda, guardSheet);
       this.caughtTexture = await setupSpriteSheetAsync(pandaCaught, guardSheet);
-
+      this.panadaSleepingTexture = await setupSpriteSheetAsync(pandaSleeping, sleepingGuard);
     }
     else if(random == 0){
       this.guardTextute = await setupSpriteSheetAsync(sloth, guardSheet);
       this.caughtTexture = await setupSpriteSheetAsync(slothCaught, guardSheet);
+      this.panadaSleepingTexture = await setupSpriteSheetAsync(slothSleeping, sleepingGuard);
+
     }
     else if(random == 2) {
       this.guardTextute = await setupSpriteSheetAsync(monkey, guardSheet);
       this.caughtTexture = await setupSpriteSheetAsync(monkeyCaught, guardSheet);
+      this.panadaSleepingTexture = await setupSpriteSheetAsync(monkeySleeping, sleepingGuard);
+
     }
     else{
       this.guardTextute = await setupSpriteSheetAsync(macaw, guardSheet);
       this.caughtTexture = await setupSpriteSheetAsync(macawCaught, guardSheet);
+      this.panadaSleepingTexture = await setupSpriteSheetAsync(macawSleeping, sleepingGuard);
+
     }
 
 
@@ -759,12 +845,15 @@ class Game {
 
     }
     else{
-      //console.log("Button released late");
+      //console.log("Button released early");
+
       this.bird.animationSpeed = 0;
-      //this.isStarted = false;
-      //this.ground2.position.y = Settings.groundPositionY;
-      //this.edge.position.y = Settings.secondCloudPositionY;
+      this.isStarted = false;
+      //this.moveBack();
       this.bird.restart(); 
+
+      this.ground2.position.y = Settings.groundPositionY;
+      this.edge.position.y = Settings.secondCloudPositionY;
       
     }
     

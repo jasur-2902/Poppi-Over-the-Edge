@@ -13,6 +13,11 @@ const Menu = ({ backToMainMenu, onMenuToggle }) => {
     >
       <View style={styles.underlay} />
       <View style={styles.root}>
+        
+        <Button color="#fff" onPress={onMenuToggle}>
+          BACK TO GAME
+        </Button>
+
         <Button
           color={colors.redLight}
           onPress={backToMainMenu}
@@ -20,9 +25,7 @@ const Menu = ({ backToMainMenu, onMenuToggle }) => {
         >
           EXIT TO MAIN MENU
         </Button>
-        <Button color="#fff" onPress={onMenuToggle}>
-          BACK TO GAME
-        </Button>
+        
       </View>
     </TouchableOpacity>
   );

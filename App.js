@@ -3,7 +3,6 @@ import * as React from 'react';
 import {Animated, Image, Text, View, TouchableOpacity } from 'react-native';
 import Modal from 'modal-enhanced-react-native-web';
 import styles from "./src/styles"; //importing styles
-import {Card} from 'react-native-elements';
 import CircleButton from './assets/CircleButton';
 import WalkingComponent from './src/walking/walking_component'
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
@@ -12,11 +11,13 @@ import { AsyncStorage } from "react-native";
 import sprites3 from './src/Sprites/guardSheet';
 import MainMenu from "./src/Menu/mainmenu";
 import CustomLevel from "./src/Menu/customLevel";
+import Victory from "./src/victory/victory";
 import Menu from "./src/Menu/inGameMenu";
 import Binocular from "./src/Binocular/binocular"
 import LevelSelection from "./src/Menu/LevelSelection";
 import Loading from "./src/Loading/loading";
 import LoginId from "./src/LoginID/loginId";
+import colors from "./assets/constants/colors";
 
 
 import { firebase } from './src/firebase/config';
@@ -39,7 +40,7 @@ export default class App extends React.Component {
   gameResult = []; 
   userId = 77777; 
   gameStats = new Map(); 
-  NUMBEROFSTAGES = 10;
+  NUMBEROFSTAGES = 5;
   numberOfPills = 0; 
 
   // Backgrounds for Level 1 Stages 
@@ -146,6 +147,7 @@ export default class App extends React.Component {
     visibleLost: false, // Lost Dialog view visability 
     visibleCaught: false, // Caught Dialog view visability 
     result: false, 
+    visibleNotEnough: false, 
     showOptions: false,
     level_1: true,
     walking: true,
@@ -165,12 +167,15 @@ export default class App extends React.Component {
 
 
   // List of available levels' settings.
-  levels = { //TODO only 3 levels are available rn, add more levels 
+  levels = { //TODO only 5 levels are available rn, add more levels 
     1: this.level1_Settings,
     2: this.level2_Settings,
     3: this.level3_Settings,
     4: this.level4_Settings,
     5: this.level5_Settings,
+
+    6: this.level5_Settings,// mock level, so we can have victory transition, 
+
   }
 
 
@@ -346,7 +351,7 @@ export default class App extends React.Component {
       {
         // Display the content in screen when state object "content" is true.
         // Hide the content in screen when state object "content" is false.
-        this.state.result && !this.state.isListEmpty ? <Text style={styles.headerText}> {"\n"}Yes, You got it right!
+        this.state.result && !this.state.isListEmpty ? <View> <Text style={styles.headerText}> {"\n"}Yes, You got it right!
 
         {this._renderButton("Next Stage", () => { 
           this.setState({ level_1: false }); 
@@ -370,7 +375,7 @@ export default class App extends React.Component {
 
           
 
-        </Text> : null
+        </Text></View> : null
 
         }
 
@@ -386,7 +391,18 @@ export default class App extends React.Component {
             
             this.setState({ level_state: 'walking' }); 
 
-            if(this.state.currentLevel.type == "regular"){
+            if(this.state.currentLevel.level == 5){
+              console.log("Current level:" + this.state.currentLevel.level);
+              this.setState({
+                level_state: 'victory',
+                level_1: false,
+                visibleModal: false, 
+                win: false, isListEmpty: false
+              })
+            }
+            else if(this.state.currentLevel.type == "regular"){
+              console.log("Current level in:" + this.state.currentLevel.level);
+
               this.setState({
                 level_1: false,
                 visibleModal: false, 
@@ -473,9 +489,20 @@ export default class App extends React.Component {
 
 
  checkForResult(userChoice){
+
+   if (this.numberOfPills < userChoice){
+     { this.gameResult.push("Incorrect") }
+      { this.gameStats["result"] = "Incorrect" }
+      { this._firebaseTest() }
+      // { console.log(this.gameResult) }
+      this.setState({ visibleModal: null });
+      this.setState({visibleNotEnough: true });
+   }
+   else{
     this.game.throwSleepingPills(userChoice); 
     this.numberOfPills = this.numberOfPills - userChoice; 
     this.setState({ visibleModal: null });
+   }
     // if(userChoice == this.currentGuard.number){
 
     //   { this.gameResult.push("Correct") }
@@ -513,8 +540,13 @@ export default class App extends React.Component {
         this.setState({showOptions: true});
 
       }
-      else
+      else{
+        this.setState({ showOptions: false });
+
         this.setState({win: true});
+        console.log("win true");
+
+      }
     }
     else{
       { this.gameResult.push("Incorrect") }
@@ -528,14 +560,15 @@ export default class App extends React.Component {
   }
 
 
-  _renderModalLost = () => (
+  _renderModalLost = (message) => (
     <View style={styles.modalContent}>
-      <Text>Guards Caught You, Please Try Again! </Text>
+      {/* <Text>Guards Caught You, Please Try Again! </Text> */}
+      <Text>{message}</Text>
       {this._renderButton("Try Again!", () => {
 
         this.toggleBinocular(); 
         this.game.destroyGame(); 
-        this.setState({ level_state: 'create_list', isBinocularVisible: !this.state.isBinocularVisible }); this.setState({ visibleLost: false });
+        this.setState({ level_state: 'create_list', isBinocularVisible: !this.state.isBinocularVisible, visibleNotEnough: false, visibleLost: false, isListEmpty: false });
       })}
     </View>
   );
@@ -558,6 +591,15 @@ export default class App extends React.Component {
 
     
   );
+
+
+  // Funtion to Toggle In Game menu 
+  onGameRestart = () => {
+    this.game.destroyGame();
+    this.setState({ level_state: 'create_list', isBinocularVisible: !this.state.isBinocularVisible, visibleNotEnough: false, visibleLost: false, isListEmpty: false});
+  };
+
+
 
   displayQuestions = () =>{
 
@@ -608,9 +650,11 @@ export default class App extends React.Component {
 
    toggleBinocular = () => {
      //console.log("it's working")
-     this.setState((state) => ({
-       isBinocularVisible: !this.state.isBinocularVisible,
-     }));
+      //if (!this.state.isListEmpty){
+        this.setState((state) => ({
+          isBinocularVisible: !this.state.isBinocularVisible,
+        }));
+      //}
     }
 
   toggleCustomLevel = () => {
@@ -753,8 +797,9 @@ export default class App extends React.Component {
                 this.setState({ stage: this.guardsList.length });
                 //let bg = require('./assets/' + path);
 
-                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 3), this.state.currentLevel.time, this.currentGuard.id);
+                this.game = new Game(context, this.currentGuard.name, Math.floor(Math.random() * 4), this.state.currentLevel.time, this.currentGuard.id);
 
+                this.game.showOptions = option => this.showOptions(option); 
                 this.game.onScore = binocularState => this.toggleBinocular(binocularState);
                 this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
                 this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
@@ -782,7 +827,19 @@ export default class App extends React.Component {
           top: 25,
           right: 25,
         }}>
-        Menu
+        MENU
+      </CircleButton>
+      <CircleButton
+        onPress={this.onGameRestart}
+        style={{
+          position: "absolute",
+          top: 25,
+          right: 135,
+        }}>
+        <Image
+          source={require('./assets/restart_icon.png')}
+          style={{ width: 27, height: 28 }}
+        />
       </CircleButton>
      
   </View>
@@ -826,7 +883,14 @@ export default class App extends React.Component {
         </Modal>
 
         <Modal isVisible={this.state.visibleLost}>
-          {this._renderModalLost()}
+          {this._renderModalLost("Guards Caught You, Please Try Again! ")}
+        </Modal>
+        <Modal isVisible={this.state.visibleNotEnough}>
+          {this._renderModalLost("You do not have enough Sleeping pills, Please Try Again! ")}
+        </Modal>
+        
+        <Modal isVisible={this.state.win}>
+          {this._renderModalContent()}
         </Modal>
 
         <Modal isVisible={this.state.visibleCaught}>
@@ -855,6 +919,13 @@ export default class App extends React.Component {
           <CustomLevel
             startCustomLevel={this.startCustomLevel}
             back = {this.backToMainMenu}
+          />)
+        }
+
+        {this.state.level_state == 'victory' && (
+          <Victory
+            //startCustomLevel={this.startCustomLevel}
+           // back={this.backToMainMenu}
           />)
         }
 
@@ -936,24 +1007,44 @@ export default class App extends React.Component {
           <View style={{
             userSelect: 'none',
             position: 'absolute',
-            top: 15,
-            left: 15,
+            top: 25,
+            left: 25,
+            justifyContent: "center",
+        
+            backgroundColor: "#C5E5F0",
+            borderRadius: 16,
+            borderWidth: 4,
+            borderColor: "#fff",
           }}>
-
-            <Card title={"Level " + this.state.currentLevel.level}>
-              <Text style={styles.paragraph}>
+            <View style={{
+              flex: 1,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 4,
+              borderColor: colors.grayDark,
+              borderRadius: 12,
+              paddingHorizontal: 15,
+              paddingVertical: 5,}}>
+            
+              <Text style={{
+                fontFamily: "Dimbo",
+                fontSize: 16,
+                fontWeight: "bold",
+                color: colors.grayDark,}}>
                 Stage {10 - this.state.stage}/10
-                {/* {console.log(this.guardsList.length)} */}
+    
               </Text>
 
               <Text> {this.numberOfPills} X
               <Image
-                  style={{ width: 15, userSelect: 'none', height: 15, top: 3 }}
+                  style={{ width: 20, userSelect: 'none', height: 20, top: 3 }}
                   source={require('./assets/sleepingSpell.png')}
                   resizeMode="contain"
                 />
               </Text>
-            </Card>
+            {/* </Card> */}
+            </View>
           </View>
 
         )}
