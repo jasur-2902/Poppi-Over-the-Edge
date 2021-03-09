@@ -21,7 +21,7 @@ const Menu = ({ backToMainMenu, onMenuToggle }) => {
         <Button
           color={colors.redLight}
           onPress={backToMainMenu}
-          style={{ marginBottom: 32 }}
+          style={{ marginTop: 32 }}
         >
           EXIT TO MAIN MENU
         </Button>
@@ -43,9 +43,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.grayDark,
     opacity: 0.9,
-  },
-  menu: {
-    margin: 8,
   },
 });
 

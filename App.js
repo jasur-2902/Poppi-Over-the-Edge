@@ -6,6 +6,7 @@ import styles from "./src/styles"; //importing styles
 import CircleButton from './assets/CircleButton';
 import WalkingComponent from './src/walking/walking_component'
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
+import TextAnimator from './components/TextAnimator';
 import Game from './src/game';
 import { AsyncStorage } from "react-native";
 import sprites3 from './src/Sprites/guardSheet';
@@ -19,6 +20,7 @@ import Loading from "./src/Loading/loading";
 import LoginId from "./src/LoginID/loginId";
 import colors from "./assets/constants/colors";
 
+import {rando, randoSequence} from '@nastyox/rando.js';
 
 import { firebase } from './src/firebase/config';
 
@@ -40,7 +42,7 @@ export default class App extends React.Component {
   gameResult = []; 
   userId = 77777; 
   gameStats = new Map(); 
-  NUMBEROFSTAGES = 5;
+  NUMBEROFSTAGES = 10;
   numberOfPills = 0; 
 
   // Backgrounds for Level 1 Stages 
@@ -93,7 +95,7 @@ export default class App extends React.Component {
     green: 5, // number of green guards in this level
     yellow: 3, // number of yellow guards in this level
     red: 2, // number of red guards in this level
-    max_repetition: 2, // max number of one type of the guard repeats
+    max_repetition: 3, // max number of one type of the guard repeats
     min_repetition: 1,
     numberOfOnes: 0, // how many times 1 will repeat 
     time: 2000, 
@@ -106,7 +108,7 @@ export default class App extends React.Component {
     green: 4, // number of green guards in this level
     yellow: 3, // number of yellow guards in this level
     red: 4, // number of red guards in this level
-    max_repetition: 2, // max number of one type of the guard repeats
+    max_repetition: 3, // max number of one type of the guard repeats
     min_repetition: 1,
     numberOfOnes: 0, // how many times 1 will repeat 
     time: 2500,
@@ -119,7 +121,7 @@ export default class App extends React.Component {
     green: 3, // number of green guards in this level
     yellow: 3, // number of yellow guards in this level
     red: 4, // number of red guards in this level
-    max_repetition: 2, // max number of one type of the guard repeats
+    max_repetition: 3, // max number of one type of the guard repeats
     min_repetition: 1,
     numberOfOnes: 0, // how many times 1 will repeat 
     time: 2500,
@@ -264,10 +266,10 @@ export default class App extends React.Component {
     //   this.guardsList.push(sprites3[i]);
     // }
 
-  
+  ///AAAA
     while (this.guardsList.length < this.NUMBEROFSTAGES) {
-      random = Math.floor(Math.random() * this.numberOfCards);
-
+      //random = Math.floor(Math.random() * this.numberOfCards);
+      random = rando(0, this.numberOfCards);
       temp = sprites3[random];
       //console.log(temp);
       // numberOfOnes: 3, // how many times 1 will repeat 
@@ -301,7 +303,7 @@ export default class App extends React.Component {
         }
       }
       count++;
-      if(count > 250){
+      if(count > 3000){
         this.setState({ level_state: 'menu' });
         break; 
       }
@@ -1026,15 +1028,33 @@ export default class App extends React.Component {
               borderRadius: 12,
               paddingHorizontal: 15,
               paddingVertical: 5,}}>
-            
+              
               <Text style={{
                 fontFamily: "Dimbo",
                 fontSize: 16,
                 fontWeight: "bold",
+                color: colors.grayDark,
+              }}>
+             { "Level " + this.state.currentLevel.level}
+              </Text>
+
+              {/* <Text style={{
+                marginTop: 3, 
+                fontFamily: "Dimbo",
+                fontSize: 14,
+                fontWeight: "bold",
                 color: colors.grayDark,}}>
                 Stage {10 - this.state.stage}/10
     
-              </Text>
+              </Text> */}
+
+              <TextAnimator
+                content='{10 - this.state.stage}/10'
+                textStyle={styles.textStyle}
+                style={styles.containerStyle}
+                duration={500}
+               
+              />
 
               <Text> {this.numberOfPills} X
               <Image

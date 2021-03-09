@@ -11,6 +11,7 @@
     "publish:web": "netlify deploy"
   },
   "dependencies": {
+    "@nastyox/rando.js": "^2.0.5",
     "@react-native-firebase/app": "^8.3.1",
     "default-passive-events": "^1.0.10",
     "expo": "^35.0.0",
@@ -31,9 +32,11 @@
     "react-native-material-dropdown": "^0.11.1",
     "react-native-stopwatch-timer": "0.0.21",
     "react-native-super-grid": "^4.0.2",
+    "react-native-tts": "^3.3.0",
     "react-native-viewport-units": "^0.0.5",
     "react-native-web": "^0.11.7",
     "realm": "^6.0.4",
+    "speak-tts": "^2.0.8",
     "xmldom": "^0.3.0"
   },
   "devDependencies": {
