@@ -14,23 +14,23 @@ export default class TextAnimator extends React.Component {
         super(props);
 
 
-        const speech = new Speech()
-        speech.init().then((data) => {
-            // The "data" object contains the list of available voices and the voice synthesis params
-            console.log("Speech is ready, voices are available", data)
-        }).catch(e => {
-            console.error("An error occured while initializing : ", e)
-        })
+        // const speech = new Speech()
+        // speech.init().then((data) => {
+        //     // The "data" object contains the list of available voices and the voice synthesis params
+        //     console.log("Speech is ready, voices are available", data)
+        // }).catch(e => {
+        //     console.error("An error occured while initializing : ", e)
+        // })
 
 
-
-        speech.speak({
-            text: 'Hello, how are you today ?',
-        }).then(() => {
-            console.log("Success !")
-        }).catch(e => {
-            console.error("An error occurred :", e)
-        })
+        // let script = "Hmmm… I wonder if there are guards down there? Press on the binoculars so I can go look over the edge.  But don’t press it too long, or the guards may see me!  Try to see how many there are as quickly as possible!";
+        // speech.speak({
+        //     text: script
+        // }).then(() => {
+        //     console.log("Success !")
+        // }).catch(e => {
+        //     console.error("An error occurred :", e)
+        // })
 
        //Textts.setDefaultLanguage('en-GB');
        // Textts.setDefaultVoice('com.apple.ttsbundle.Daniel-compact')

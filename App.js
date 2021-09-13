@@ -6,8 +6,9 @@ import styles from "./src/styles"; //importing styles
 import CircleButton from './assets/CircleButton';
 import WalkingComponent from './src/walking/walking_component'
 import DisableBodyScrollingView from './components/DisableBodyScrollingView';
-import TextAnimator from './components/TextAnimator';
+import TextBox from './assets/TextBox';
 import Game from './src/game';
+import Tutorial from './src/tutorial';
 import { AsyncStorage } from "react-native";
 import sprites3 from './src/Sprites/guardSheet';
 import MainMenu from "./src/Menu/mainmenu";
@@ -37,13 +38,16 @@ export default class App extends React.Component {
   guardsList = [];
   backgroundList = [];
   numberOfCards = 49;
-  game = null;
+  game;
   currentGuard;
   gameResult = []; 
   userId = 77777; 
   gameStats = new Map(); 
   NUMBEROFSTAGES = 10;
   numberOfPills = 0; 
+  textBoxState = "start"; 
+  isTutorial = true;
+  NUMBEROFSTAGESTUTORIAL = 3 
 
   // Backgrounds for Level 1 Stages 
   level1_backgrounds = ['background/lvl1.png', 'background/lvl1.png',
@@ -210,6 +214,7 @@ export default class App extends React.Component {
   _storeData = async () => {
     try {
        await AsyncStorage.setItem('highest_level', this.state.highestLevel);
+       await AsyncStorage.setItem('isTutorial', this.isTutorial);
 
     } catch (error) {
       // Error saving data
@@ -221,7 +226,10 @@ export default class App extends React.Component {
     try {
       // const current_level = await AsyncStorage.getItem('current_level');
       const highest_level = await AsyncStorage.getItem('highest_level');
-      if (highest_level !== null) {
+      const isTutorial = await AsyncStorage.getItem('isTutorial');
+
+      console.log("Retreiving data: ", isTutorial);
+      if (highest_level !== null ) {
 
         // Our data is fetched successfully
         //this.setState({ highestLevel: highest_level });
@@ -232,15 +240,38 @@ export default class App extends React.Component {
       else{
         //console.log("null")
       }
+
+
+      if (isTutorial != null) {
+
+        // Our data is fetched successfully
+        //this.setState({ highestLevel: highest_level });
+       // this.setState({ isTutorial: isTutorial })
+
+        // console.log(highest_level);
+      }
+      else {
+        //console.log("null")
+      }
     } catch (error) {
       // Error retrieving data
     }
   }
 
+
+  // shouldComponentUpdate(nextProps, nextState) {
+   
+  //   console.log(nextProps);
+  //   if (nextState.value !== 3) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
+
   // Functions that creates guardList for the given level 
   createGuardList(level){
 
-    this.setState({isBinocularVisible: false}); 
+    //this.setState({isBinocularVisible: false}); 
 
 
     this.guardsList = []
@@ -266,7 +297,12 @@ export default class App extends React.Component {
     //   this.guardsList.push(sprites3[i]);
     // }
 
-  ///AAAA
+    if (this.isTutorial)
+      this.NUMBEROFSTAGES = this.NUMBEROFSTAGESTUTORIAL;
+    else
+      this.NUMBEROFSTAGES = 10; 
+
+    ///
     while (this.guardsList.length < this.NUMBEROFSTAGES) {
       //random = Math.floor(Math.random() * this.numberOfCards);
       random = rando(0, this.numberOfCards);
@@ -314,6 +350,11 @@ export default class App extends React.Component {
     this.backgroundList = Object.assign([],level.background);
 
     this.setState({ level_state: 'levelOne' });
+    // if(!this.isTutorial)
+    //   
+    // else
+    //   this.setState({ level_state: 'tutorial' });
+
   }
 
   //Function that creates buttons for dialog view. 
@@ -347,6 +388,12 @@ export default class App extends React.Component {
             {this._renderButton("5", () => this.checkForResult(5))}
 
           </Text>
+
+            {(this.isTutorial == true && this.game != null && this.textBoxState == 'pressed' && this.state.stage == this.NUMBEROFSTAGESTUTORIAL-1) && 
+                (this.game.scriptTextBox("How many guards did you see?  Press on the number of guards you think you saw.  I will throw that number of sleeping pills over the edge."))
+            }
+
+
         </View>: null
       }
 
@@ -354,15 +401,11 @@ export default class App extends React.Component {
         // Display the content in screen when state object "content" is true.
         // Hide the content in screen when state object "content" is false.
         this.state.result && !this.state.isListEmpty ? <View> <Text style={styles.headerText}> {"\n"}Yes, You got it right!
-
+        
         {this._renderButton("Next Stage", () => { 
           this.setState({ level_1: false }); 
           this.setState({ visibleModal: false, level_state:"loading" });
-          //console.log("Changes state to loading");
-          //this.setState({ isLoadingVisible: true  });
-          // this.setState({ level_state: 'loading' }); 
-          // this.setState({ level_state: 'levelOne' }); 
-          
+
           setTimeout(() => {
             //console.log("Change State")
             this.setState({ level_state: "levelOne" }); 
@@ -393,7 +436,18 @@ export default class App extends React.Component {
             
             this.setState({ level_state: 'walking' }); 
 
-            if(this.state.currentLevel.level == 5){
+            if(this.isTutorial){
+              this.isTutorial = false;
+              this.setState({
+               
+                visibleModal: false,
+                level_state: 'walking',
+                win: false, 
+                isListEmpty: false 
+                
+              })
+            }
+            else if(this.state.currentLevel.level == 5){
               console.log("Current level:" + this.state.currentLevel.level);
               this.setState({
                 level_state: 'victory',
@@ -428,12 +482,10 @@ export default class App extends React.Component {
               });
 
             }
-              }
-             
-             
-             
-             
-             )}
+
+            this._storeData();
+            }
+          )}
             
  
         </Text> : null
@@ -445,6 +497,7 @@ export default class App extends React.Component {
 
   _renderModalNext= () => (
     <View isLost={false} style={styles.modalContent}>
+
 
       {
         // Display the content in screen when state object "content" is true.
@@ -472,9 +525,18 @@ export default class App extends React.Component {
         })}
 
 
+         
 
         </Text> : null
 
+      }
+      {
+        (this.game != null && this.state.showOptions && this.userChoice == 1 && this.isTutorial) &&
+        (this.game.scriptTextBox("You’re right!  There was one guard!  It is now asleep!  Good job!  Let’s keep going.  But keep looking over the edge so you can put all of the guards to sleep."))
+      }
+      {
+        (this.game != null && this.state.showOptions && this.userChoice > 1 && this.isTutorial) &&
+        (this.game.scriptTextBox("You’re right!  There were " + this.userChoice + " guards! They are now asleep!  Good job!  Let’s keep going.  But keep looking over the edge so you can put all of the guards to sleep."))
       }
     </View>
   );
@@ -489,14 +551,14 @@ export default class App extends React.Component {
 
   }
 
-
+ userChoice; 
+ 
  checkForResult(userChoice){
+   this.userChoice = userChoice; 
 
+   // This checks if user has enough sleeping pills to throw 
+   // If user doesn't have enough pills, user will lose. 
    if (this.numberOfPills < userChoice){
-     { this.gameResult.push("Incorrect") }
-      { this.gameStats["result"] = "Incorrect" }
-      { this._firebaseTest() }
-      // { console.log(this.gameResult) }
       this.setState({ visibleModal: null });
       this.setState({visibleNotEnough: true });
    }
@@ -505,37 +567,13 @@ export default class App extends React.Component {
     this.numberOfPills = this.numberOfPills - userChoice; 
     this.setState({ visibleModal: null });
    }
-    // if(userChoice == this.currentGuard.number){
-
-    //   { this.gameResult.push("Correct") }
-    //   { this.gameStats["result"] = "Correct"}
-    //   // { console.log(this.gameResult) }
-    //   // { console.log(this.gameStats) }
-    //   // { console.log(this.gameStats['level']) }
-    //   { this._firebaseTest()}
-    //   if(!this.state.isListEmpty)
-    //     !this.setState({ result: true });
-    //   else
-    //     this.setState({win: true});
-    // }
-    // else{
-    //   { this.gameResult.push("Incorrect") }
-    //   { this.gameStats["result"] = "Incorrect" }
-    //   { this._firebaseTest() }
-    //   // { console.log(this.gameResult) }
-    //   this.setState({ visibleModal: null });
-    //   this.setState({visibleLost: true });
-
-    // }
 
  }
 
   showOptions(option) {
     
     if(option == "next"){
-      { this.gameResult.push("Correct") }
-      { this.gameStats["result"] = "Correct"}
-      //{ this._firebaseTest()}
+
       //this.setState({ visibleModal: false, level_state: "loading" });
       if(!this.state.isListEmpty){
         console.log(option);
@@ -565,19 +603,41 @@ export default class App extends React.Component {
   _renderModalLost = (message) => (
     <View style={styles.modalContent}>
       {/* <Text>Guards Caught You, Please Try Again! </Text> */}
+
+      
       <Text>{message}</Text>
       {this._renderButton("Try Again!", () => {
 
         this.toggleBinocular(); 
         this.game.destroyGame(); 
+        this.textBoxState = "start"; 
         this.setState({ level_state: 'create_list', isBinocularVisible: !this.state.isBinocularVisible, visibleNotEnough: false, visibleLost: false, isListEmpty: false });
       })}
+      
+      {/* {console.log(this.textBoxState)} */}
+
+      {
+        (this.game != null && this.state.visibleLost && this.userChoice == 1 && this.isTutorial) &&
+        (
+          this.game.scriptTextBox("Oh no!  You thought there was " + this.userChoice + " guard, but there were really " + this.currentGuard.number + "!  You didn’t throw enough sleeping pills to put them all to sleep, so they caught you!  The guards will put you outside, but you can try this level again.")
+        )
+}
+
+      {
+        (this.game != null && this.state.visibleLost && this.userChoice > 1 && this.isTutorial) &&
+        (          
+          this.game.scriptTextBox("Oh no!  You thought there were " + this.userChoice + " guards, but there were really " + this.currentGuard.number + "!  You didn’t throw enough sleeping pills to put them all to sleep, so they caught you!  The guards will put you outside, but you can try this level again.")
+        )
+    }
+
+
     </View>
   );
 
 
   _renderModalCaught= () => (
     <View style={styles.modalContent}>
+      
       <Text>The Guards caught you! Please Try Again! </Text>
       {this._renderButton("Try Again!", () => {
         { this.gameStats["result"] = "Caught" }
@@ -589,6 +649,13 @@ export default class App extends React.Component {
       })}
      
 
+      {(this.game != null && this.state.visibleCaught && this.isTutorial) &&
+        (
+          this.textBoxState = "start",
+          this.game.scriptTextBox("Oh no!  You looked too long, and the guards caught you!  The guards will put you outside, but you can try this level again.")
+        )
+      }
+      
     </View>
 
     
@@ -598,6 +665,7 @@ export default class App extends React.Component {
   // Funtion to Toggle In Game menu 
   onGameRestart = () => {
     this.game.destroyGame();
+    this.textBoxState = "start";
     this.setState({ level_state: 'create_list', isBinocularVisible: !this.state.isBinocularVisible, visibleNotEnough: false, visibleLost: false, isListEmpty: false});
   };
 
@@ -608,9 +676,11 @@ export default class App extends React.Component {
     if(!this.game.userLost)
       {
       this.setState({ visibleModal: true }); this.game.isButtonReleased = true;
+      { this.textBoxState = "pressed" }
       }
     else{
       this.setState({ visibleCaught: true });
+      this.textBoxState = "caughtTextBoxState";
     
     }
   };
@@ -633,6 +703,8 @@ export default class App extends React.Component {
   }
 
   backToMainMenu = () => {
+    this.textBoxState = "start"; 
+    this.game.destroyGame(); 
     this.setState({
       isMainMenuVisible: true,
       level_state: 'menu',
@@ -646,10 +718,10 @@ export default class App extends React.Component {
       isMainMenuVisible: false,
       isLoadingVisible: true, 
       level_state: 'create_list',
+     
     });
   };
   
-
    toggleBinocular = () => {
      //console.log("it's working")
       //if (!this.state.isListEmpty){
@@ -700,17 +772,17 @@ export default class App extends React.Component {
 
   //fadeAnim = React.useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
 
-  animate() {
-    React.useEffect(() => {
-      Animated.timing(
-        fadeAnim,
-        {
-          toValue: 1,
-          duration: 1000,
-        }
-      ).start();
-    }, [fadeAnim])
-  }
+  // animate() {
+  //   React.useEffect(() => {
+  //     Animated.timing(
+  //       fadeAnim,
+  //       {
+  //         toValue: 1,
+  //         duration: 1000,
+  //       }
+  //     ).start();
+  //   }, [fadeAnim])
+  // }
 
 
   addTimeSpent = (time) =>{
@@ -736,6 +808,7 @@ export default class App extends React.Component {
 
   nextStage = () => {
     this.setState({ isLoadingVisible: true, level_state: 'loading' , result: false  });
+    this.textBoxState = "temp";
     this.game.toggleLoadingPage();
     //this.game.
   } 
@@ -754,28 +827,7 @@ export default class App extends React.Component {
               if (this.guardsList.length > 1) {
 
                 this.currentGuard = this.guardsList.pop();
-                // let path = this.backgroundList.pop();
-                // let bg = require('./assets/' + path);
-
-                //console.log("Current Guard: " + this.currentGuard.number);
-              
-                // Adding timestamp 
-                this.gameStats["timeStamp"] = Date.now(); 
-                this.gameResult.push( Date.now());
-
-                //Adding number of guards 
-                this.gameStats["numOfguards"] = this.currentGuard.number; 
-                this.gameResult.push(this.currentGuard.number);
-
-                //Adding level 
-                this.gameStats["level"] = this.state.currentLevel.level;
-                this.gameResult.push(this.state.currentLevel.level);
-                
-                //Time Limit
-                this.gameStats["givenTime"] = this.state.currentLevel.time;
-                this.gameResult.push(this.state.currentLevel.time); 
-
-
+    
                 this.setState({ stage: this.guardsList.length });
 
                 this._storeData();
@@ -847,14 +899,115 @@ export default class App extends React.Component {
   </View>
 );
 
+
+
+  tutorial = (
+
+    <View>
+
+      <View style={[{ width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0,7)'}]}>
+
+        <DisableBodyScrollingView >
+
+          <GLView
+            style={{ flex: 1, backgroundColor: 'black' }}
+            onContextCreate={context => {
+              if (this.guardsList.length > 1) {
+
+                this.currentGuard = this.guardsList.pop();
+
+                this.setState({ stage: this.guardsList.length });
+
+                //this._storeData();
+               // this._retrieveData();
+
+                this.game = new Tutorial(context, this.currentGuard.name, Math.floor(Math.random() * 4), this.state.currentLevel.time, this.currentGuard.id);
+                
+                // this.textBox = this.game.render(); 
+                //console.log("guard name", this.currentGuard.name);
+
+                this.game.showOptions = option => this.showOptions(option);
+                this.game.onScore = binocularState => this.toggleBinocular(binocularState);
+                this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
+                this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
+
+              }
+              else {
+                this.setState({ isListEmpty: true })
+                this.currentGuard = this.guardsList.pop();
+                //let path = this.backgroundList.pop();
+                //.log("Current Guard: " + this.currentGuard);
+                this.setState({ stage: this.guardsList.length });
+                //let bg = require('./assets/' + path);
+
+                this.game = new Tutorial(context, this.currentGuard.name, Math.floor(Math.random() * 4), this.state.currentLevel.time, this.currentGuard.id);
+
+                this.game.showOptions = option => this.showOptions(option);
+                this.game. onScore = binocularState => this.toggleBinocular(binocularState);
+                this.game.loading = loadingState => this.toggleLoadingPage(loadingState);
+                this.game.timeSpent = timeSpent => this.addTimeSpent(timeSpent);
+                //this.game.onSleepingPills = sleepingPills => this.setState({ sleepingPills });
+              }
+
+            }}
+          >
+          </GLView>
+
+
+
+        </DisableBodyScrollingView>
+
+      </View>
+
+
+      {/* ======================================================================================= */}
+
+
+      <CircleButton
+        onPress={this.onMenuToggle}
+        style={{
+          position: "absolute",
+          top: 25,
+          right: 25,
+        }}>
+        MENU
+      </CircleButton>
+      <CircleButton
+        onPress={this.onGameRestart}
+        style={{
+          position: "absolute",
+          top: 25,
+          right: 135,
+        }}>
+        <Image
+          source={require('./assets/restart_icon.png')}
+          style={{ width: 27, height: 28 }}
+        />
+      </CircleButton>
+
+    </View>
+  );
+
+
   lazyWithPreload(factory) {
     const Component = React.lazy(factory);
     Component.preload = factory;
-    //console.log("preloading");
     return Component;
   }
 
+  // Preload interface for Game and Tutorial 
   gameInterface = this.lazyWithPreload(() => this.levelOne);
+  gameInterfaceTutorial = this.lazyWithPreload(() => this.tutorial);
+
+  renderContent = () => {
+    if (this.state.level_state == 'levelOne' && this.isTutorial == true) {
+      return (this.gameInterfaceTutorial.preload());
+    }
+    else{
+      return (this.gameInterfaceTutorial.preload());
+    }
+  }
+
 
   render() {
 
@@ -865,22 +1018,17 @@ export default class App extends React.Component {
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 5,
-        borderColor: '#FF1744'
+        borderColor: '#FF1744',
         }}>
 
        
       {/* {console.log("Highest levle: "+this.state.highestLevel)} */}
 
-        {this.state.isInGameMenuVisible && (
-          <Menu
-            style={{ zIndex: 100 }}
-            backToMainMenu={this.backToMainMenu}
-            onMenuToggle={this.onMenuToggle}
-          />)}
 
         <Modal isVisible={this.state.visibleModal}
         // onBackdropPress={() => this.setState({ visibleModal: false })}
         >
+        
           {this._renderModalContent()}
         </Modal>
 
@@ -954,70 +1102,138 @@ export default class App extends React.Component {
 
         />)}
 
-        {this.state.level_state == 'levelOne' &&
-          this.gameInterface.preload()
-        }
+        {(this.state.level_state == 'levelOne' ) && (this.renderContent())}
+        
+        {/* {(this.state.level_state == 'levelOne' && this.isTutorial == true) &&
 
-        {this.state.level_state == 'levelOne' &&(
+         ( 
+          this.gameInterfaceTutorial.preload()
+          )
+    
+         }
+
+        {(this.state.level_state == 'levelOne' && this.isTutorial == false) &&
+
+          (
+            this.gameInterface.preload()
+          )
+
+        } */}
+
+        {(this.state.level_state == 'levelOne')  &&(
+         
           <View style= {{
-              zIndex: 99999
-            }}>
-         <View
-            style={{
-              userSelect: 'none',
-              position: 'absolute',
-              bottom: 50,
-              left: 100,
-              zIndex: 99999
-            }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
-              <Image
-                style={{ width: 100, userSelect: 'none', height: 100 }}
-                source={require('./assets/binoculars6.png')}
-                resizeMode="contain" />
-              {/* <Text style={{ fontWeight: '600', userSelect: 'none' }}>Expo</Text> */}
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={{
-              userSelect: 'none',
-              position: 'absolute',
-              bottom: 50,
-              left: 100,
-              zIndex: 99999
-            }}
-            onLongPress={() => {
-              this.game.onPress(); //console.log("it's been pressed");
-            }}
-            onPressOut={() => {
+              zIndex: 999,
+              flex: 1,
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
               
-                this.game.onPressOut();
-              if (this.game.binocularState){
-                  this.displayQuestions(); 
-                 // this.toggleBinocular();
-                }
+            }}>
+          
+            <View
+                style={{
+                  userSelect: 'none',
+                  position: 'absolute',
+                  bottom: 50,
+                  left: 100,
+                  zIndex: 999,
+                  
+                }}>
+                  
 
-              }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
+              {(!this.isTutorial) && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
+                  <Image
+                    style={{ width: 100, userSelect: 'none', height: 100 }}
+                    source={require('./assets/binoculars6.png')}
+                    resizeMode="contain" />
+              </View>
+              
+              )}
+
+              {(this.isTutorial && this.textBoxState == "start") && (
+
+                <View style={{
+                  
+                  //backgroundColor: 'transparent',
+                  backgroundColor: 'rgba(0,0,0,0.0)',
+                  
+                }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
+                  <Image
+                    style={{ width: 100, userSelect: 'none', height: 100 }}
+                    source={require('./assets/binoculars.gif')}
+                    resizeMode="contain" />
+                </View>
+                </View>
+              )}
+
+              {(this.isTutorial && this.textBoxState != "start") && (
+
+                <View style={{
+
+                  //backgroundColor: 'transparent',
+                  backgroundColor: 'rgba(0,0,0,0.0)',
+
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', width: '10vw', userSelect: 'none', height: '10vh' }}>
+                    <Image
+                      style={{ width: 100, userSelect: 'none', height: 100 }}
+                      source={require('./assets/binoculars6.png')}
+                      resizeMode="contain" />
+                  </View>
+                </View>
+              )}
+
             </View>
-          </TouchableOpacity>
+
+
+              <TouchableOpacity
+                style={{
+                  userSelect: 'none',
+                  position: 'absolute',
+                  bottom: 50,
+                  left: 100,
+                  zIndex: 999
+                }}
+                onLongPress={() => {
+                  this.game.onPress(); //console.log("it's been pressed");
+                  //this.textBox = this.game.render();
+                  
+      
+
+                }}
+                onPressOut={() => {
+                  
+                    this.game.onPressOut();
+                  if (this.game.binocularState){
+                      this.displayQuestions(); 
+                    // this.toggleBinocular();
+           
+
+                    }
+
+                  }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: '20vw', userSelect: 'none', height: '20vh' }}>
+                </View>
+              </TouchableOpacity>
           </View>
         )}
 
-        {this.state.level_state == 'levelOne' && (
+        {(this.state.level_state == 'levelOne' && this.isTutorial == false) && (
           <View style={{
             userSelect: 'none',
             position: 'absolute',
             top: 25,
             left: 25,
             justifyContent: "center",
-        
             backgroundColor: "#C5E5F0",
             borderRadius: 16,
             borderWidth: 4,
             borderColor: "#fff",
           }}>
+
             <View style={{
               flex: 1,
               width: "100%",
@@ -1038,7 +1254,7 @@ export default class App extends React.Component {
              { "Level " + this.state.currentLevel.level}
               </Text>
 
-              {/* <Text style={{
+              <Text style={{
                 marginTop: 3, 
                 fontFamily: "Dimbo",
                 fontSize: 14,
@@ -1046,15 +1262,15 @@ export default class App extends React.Component {
                 color: colors.grayDark,}}>
                 Stage {10 - this.state.stage}/10
     
-              </Text> */}
+              </Text>
 
-              <TextAnimator
+              {/* <TextAnimator
                 content='{10 - this.state.stage}/10'
                 textStyle={styles.textStyle}
                 style={styles.containerStyle}
                 duration={500}
                
-              />
+              /> */}
 
               <Text> {this.numberOfPills} X
               <Image
@@ -1068,6 +1284,122 @@ export default class App extends React.Component {
           </View>
 
         )}
+
+        {(this.state.level_state == 'levelOne' && this.isTutorial == true) && (
+          <View style={{
+            userSelect: 'none',
+            position: 'absolute',
+            top: 25,
+            left: 25,
+            justifyContent: "center",
+            backgroundColor: "#C5E5F0",
+            borderRadius: 16,
+            borderWidth: 4,
+            borderColor: "#fff",
+          }}>
+
+          {console.log("Level State: ", this.state.level_state)}
+          {console.log("Is Tutorial: ", this.isTutorial)}
+
+            <View style={{
+              flex: 1,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 4,
+              borderColor: colors.grayDark,
+              borderRadius: 12,
+              paddingHorizontal: 15,
+              paddingVertical: 5,
+            }}>
+
+              <Text style={{
+                fontFamily: "Dimbo",
+                fontSize: 16,
+                fontWeight: "bold",
+                color: colors.grayDark,
+              }}>
+                Tutorial
+              </Text>
+
+              <Text style={{
+                marginTop: 3,
+                fontFamily: "Dimbo",
+                fontSize: 14,
+                fontWeight: "bold",
+                color: colors.grayDark,
+              }}>
+                Stage {this.NUMBEROFSTAGESTUTORIAL - this.state.stage}/{this.NUMBEROFSTAGESTUTORIAL}
+
+              </Text>
+
+              {/* <TextAnimator
+                content='{10 - this.state.stage}/10'
+                textStyle={styles.textStyle}
+                style={styles.containerStyle}
+                duration={500}
+              /> */}
+
+              <Text> {this.numberOfPills} X
+              <Image
+                  style={{ width: 20, userSelect: 'none', height: 20, top: 3 }}
+                  source={require('./assets/sleepingSpell.png')}
+                  resizeMode="contain"
+                />
+              </Text>
+              {/* </Card> */}
+            </View>
+          </View>
+
+        )}
+
+
+        {( this.state.level_state == "levelOne" && this.isTutorial && this.game != null && this.state.stage == 2 && this.textBoxState == "start") && (
+
+         // 
+          <View
+            style={{
+              position: 'absolute',
+              userSelect: 'none',
+              alignSelf: 'center', 
+              top: "3.5%", 
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          > 
+            {(this.game.scriptTextBox != null) && this.game.scriptTextBox("Hmmm… I wonder if there are guards down there ? Press and hold the binoculars so I can go look over the edge.")}
+          </View>
+
+        )}
+
+
+        {/* {(this.state.isTutorial && this.textBoxState == "pressed" && this.game != null) && (
+
+          // 
+          <View
+            style={{
+              position: 'absolute',
+              userSelect: 'none',
+              alignSelf: 'center',
+              bottom: "10%",
+              width: '100%',
+              alignItems: 'center',
+              zIndex: 999999,
+              justifyContent: 'center',
+            }}
+          >
+            {this.game.scriptTextBox("How many guards did you see?  Press on the number of guards you think you saw.  I will throw that number of sleeping pills over the edge.")}
+          </View>
+
+        )} */}
+
+
+        {this.state.isInGameMenuVisible && (
+          <Menu
+            backToMainMenu={this.backToMainMenu} // this will return to main menu 
+            onMenuToggle={this.onMenuToggle}
+          />)}
 
         {this.state.isLoadingVisible && (<Loading
           
